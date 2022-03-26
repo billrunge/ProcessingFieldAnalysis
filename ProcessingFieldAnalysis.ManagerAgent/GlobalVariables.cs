@@ -14,5 +14,6 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         public static readonly Guid PROCESSING_FIELD_OBJECT_MINIMUM_LENGTH_FIELD = new Guid("6DD10E5A-33B3-4F23-972C-E8D097CF7F88");
         public static readonly Guid PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD = new Guid("868238A4-45C8-4305-A5F0-6DAF263A5A17");
         public static readonly Guid PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD = new Guid("2581697D-D3E3-4DC5-8E3C-E9C5F05D1531");
+        public static readonly Guid PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD = new Guid("1BDD02EF-E645-49D2-8D99-DB23676A9AE3");
     }
 }

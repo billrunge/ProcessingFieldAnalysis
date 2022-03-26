@@ -1,10 +1,13 @@
 ﻿using Relativity.API;
 using Relativity.ObjectManager.V1.Interfaces;
 using Relativity.ObjectManager.V1.Models;
+using Relativity.Services.FieldMapping;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ProcessingFieldAnalysis.ManagerAgent
@@ -102,6 +105,126 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 choices.Add((string)row["Name"],(int)row["ArtifactID"]);
             }
             return choices;
+        }
+
+        public async Task PopulateProcessingFieldAsync(IHelper helper, IAPILog logger)
+        {
+            List<FieldRef> fields = new List<FieldRef>()
+                {
+                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_SOURCE_NAME_HASH_FIELD },
+                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_FRIENDLY_NAME_FIELD },
+                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD },
+                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_DESCRIPTION_FIELD },
+                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_MINIMUM_LENGTH_FIELD },
+                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD },
+                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD },
+                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD }
+                };
+
+            //helpers
+            InvariantField invariantField = new InvariantField();
+            ProcessingFieldObject processingFieldObject = new ProcessingFieldObject();
+            ApplicationWorkspace appWorkspace = new ApplicationWorkspace();
+
+            DataTable installedWorkspaceArtifactIds = appWorkspace.RetrieveApplicationWorkspaces(helper.GetDBContext(-1));
+
+            foreach (DataRow workspaceArtifactIdRow in installedWorkspaceArtifactIds.Rows)
+            {
+                int workspaceArtifactId = (int)workspaceArtifactIdRow["CaseID"];
+
+                MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(helper, workspaceArtifactId, logger);
+
+                List<string> existingProcessingFields = new List<string>();
+                existingProcessingFields = await processingFieldObject.GetProcessingFieldNameListFromWorkspace(helper, workspaceArtifactId, logger);
+
+                List<IReadOnlyList<object>> fieldValues = new List<IReadOnlyList<object>>();
+                foreach (MappableSourceField mappableSourceField in mappableSourceFields)
+                {
+                    if (!existingProcessingFields.Contains(mappableSourceField.SourceName))
+                    {
+                        Dictionary<string, int> existingCategoryChoices = new Dictionary<string, int>();
+                        existingCategoryChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD, logger);
+
+                        Dictionary<string, int> existingDataTypeChoices = new Dictionary<string, int>();
+                        existingDataTypeChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD, logger);
+
+                        Dictionary<string, int> existingMappedFieldsChoices = new Dictionary<string, int>();
+                        existingMappedFieldsChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD, logger);
+
+                        int categoryChoiceArtifactId;
+                        int dataTypeChoiceArtifactId;
+                        List<ChoiceRef> mappedFieldsChoiceRefs = new List<ChoiceRef>();
+
+                        if (existingDataTypeChoices.ContainsKey(mappableSourceField.DataType))
+                        {
+                            existingDataTypeChoices.TryGetValue(mappableSourceField.DataType, out dataTypeChoiceArtifactId);
+                        }
+                        else
+                        {
+                            dataTypeChoiceArtifactId = await appWorkspace.CreateChoiceAsync(helper, workspaceArtifactId, mappableSourceField.DataType, GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD);
+                        }
+
+                        if (existingCategoryChoices.ContainsKey(mappableSourceField.Category))
+                        {
+                            existingCategoryChoices.TryGetValue(mappableSourceField.Category, out categoryChoiceArtifactId);
+                        }
+                        else
+                        {
+                            categoryChoiceArtifactId = await appWorkspace.CreateChoiceAsync(helper, workspaceArtifactId, mappableSourceField.Category, GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD);
+                        }
+
+                        if (mappableSourceField.MappedFields != null)
+                        {
+                            foreach (string mappedField in mappableSourceField.MappedFields)
+                            {
+                                int mappedFieldArtifactId;
+                                if (existingMappedFieldsChoices.ContainsKey(mappedField))
+                                {
+                                    existingMappedFieldsChoices.TryGetValue(mappedField, out mappedFieldArtifactId);
+                                }
+                                else
+                                {
+                                    mappedFieldArtifactId = await appWorkspace.CreateChoiceAsync(helper, workspaceArtifactId, mappedField, GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD);
+                                }
+
+                                mappedFieldsChoiceRefs.Add(new ChoiceRef { ArtifactID = mappedFieldArtifactId });
+                            }
+                        }
+
+                        IReadOnlyList<object> fieldValue = new List<object>()
+                            {
+                                ComputeHashString(mappableSourceField.SourceName),
+                                mappableSourceField.FriendlyName,
+                                new ChoiceRef { ArtifactID = categoryChoiceArtifactId },
+                                mappableSourceField.Description,
+                                mappableSourceField.Length,
+                                new ChoiceRef { ArtifactID = dataTypeChoiceArtifactId },
+                                mappableSourceField.SourceName,
+                                mappedFieldsChoiceRefs
+                            };
+                        fieldValues.Add(fieldValue);
+                    }
+                }
+                await processingFieldObject.CreateProcessingFieldObjects(helper, workspaceArtifactId, logger, fields, fieldValues);
+            }
+        }
+
+        static string ComputeHashString(string rawData)
+        {
+            // Create a SHA256   
+            using (SHA512 sha512Hash = SHA512.Create())
+            {
+                // ComputeHash - returns byte array  
+                byte[] bytes = sha512Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+
+                // Convert byte array to a string   
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
         }
     }
 }
