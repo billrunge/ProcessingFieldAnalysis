@@ -1,14 +1,13 @@
 ﻿using Relativity.ObjectManager.V1.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class Field
     {
+        /// <summary>
+        /// A list of FieldRefs to interface to the fields in the IFieldMapping.MappableSourceField object
+        /// </summary>
         public List<FieldRef> fields = new List<FieldRef>()
                 {
                     new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_SOURCE_NAME_HASH_FIELD },
