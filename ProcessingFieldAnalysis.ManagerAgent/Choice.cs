@@ -16,6 +16,12 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <summary>
         /// Creates a Choice for a given Field (identified by Guid)
         /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="workspaceArtifactId"></param>
+        /// <param name="choiceName"></param>
+        /// <param name="fieldGuid"></param>
+        /// <param name="logger"></param>
+        /// <returns>int</returns>
         public async Task<int> CreateChoiceAsync(IHelper helper, int workspaceArtifactId, string choiceName, Guid fieldGuid, IAPILog logger)
         {
             try
@@ -36,12 +42,19 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             return 0;
         }
+
         /// <summary>
         /// Takes a Field Guid and a Choice name, checks if there is a Choice that
         /// already exists with that name for that Field, and if so returns its ChoiceRef
         /// If there is not Choice on the Field with he supplied name, it will create the Choice 
         /// and return the new Choice's ChoiceRef
         /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="workspaceArtifactId"></param>
+        /// <param name="singleChoiceFieldGuid"></param>
+        /// <param name="choiceName"></param>
+        /// <param name="logger"></param>
+        /// <returns>ChoiceRef</returns>
         public async Task<ChoiceRef> GetSingleChoiceChoiceRefByNameAsync(IHelper helper, int workspaceArtifactId, Guid singleChoiceFieldGuid, string choiceName, IAPILog logger)
         {
             try
@@ -71,6 +84,12 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// If there is not Choice on the Field with the supplied name, it will create the Choice 
         /// and return the new Choice's ChoiceRef in the output list
         /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="workspaceArtifactId"></param>
+        /// <param name="multipleChoiceFieldGuid"></param>
+        /// <param name="choiceNames"></param>
+        /// <param name="logger"></param>
+        /// <returns>List<ChoiceRef></returns>
         public async Task<List<ChoiceRef>> GetMultipleChoiceRefsByNameAsync(IHelper helper, int workspaceArtifactId, Guid multipleChoiceFieldGuid, string[] choiceNames, IAPILog logger)
         {
             try
@@ -103,10 +122,16 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             return new List<ChoiceRef>();
         }
+
         /// <summary>
         /// Gets a list of Choice names associated with a specific Field (identified by Guid)
         /// Currently uses SQL, but would like to replace with API
         /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="workspaceArtifactId"></param>
+        /// <param name="fieldGuid"></param>
+        /// <param name="logger"></param>
+        /// <returns>Dictionary<string, int></returns>
         public Dictionary<string, int> GetChoicesByField(IHelper helper, int workspaceArtifactId, Guid fieldGuid, IAPILog logger)
         {
             try
