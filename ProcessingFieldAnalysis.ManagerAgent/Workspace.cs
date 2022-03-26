@@ -22,7 +22,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
             var sqlParams = new List<SqlParameter>
             {
-                new SqlParameter("@applicationGuid", SqlDbType.UniqueIdentifier) {Value = GlobalVariables.PROCESSING_FIELD_APPLICATION_GUID}
+                new SqlParameter("@applicationGuid", SqlDbType.UniqueIdentifier) {Value = GlobalVariable.PROCESSING_FIELD_APPLICATION_GUID}
             };
 
             DataTable installedWorkspacesDataTable = eddsDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);

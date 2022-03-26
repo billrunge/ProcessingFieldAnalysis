@@ -76,7 +76,7 @@
     <Compile Include="Field.cs" />
     <Compile Include="ProcessingField.cs" />
     <Compile Include="Workspace.cs" />
-    <Compile Include="GlobalVariables.cs" />
+    <Compile Include="GlobalVariable.cs" />
     <Compile Include="InvariantField.cs" />
     <Compile Include="ProcessingFieldAnalysisManagerAgent.cs" />
     <Compile Include="ProcessingFieldObject.cs" />

@@ -5,7 +5,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
     /// <summary>
     /// Global variables
     /// </summary>
-    public static class GlobalVariables
+    public static class GlobalVariable
     {
         public static readonly Guid PROCESSING_FIELD_APPLICATION_GUID = new Guid("E86BBEDE-3395-4E48-8194-713328B0D976");
         public static readonly Guid PROCESSING_FIELD_OBJECT = new Guid("9122C660-2ED7-4BF2-B44E-C168AC4F06AE");

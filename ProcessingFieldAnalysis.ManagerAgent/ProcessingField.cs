@@ -19,7 +19,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     {
                         var massCreateRequest = new MassCreateRequest
                         {
-                            ObjectType = new ObjectTypeRef { Guid = GlobalVariables.PROCESSING_FIELD_OBJECT },
+                            ObjectType = new ObjectTypeRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT },
                             Fields = fields,
                             ValueLists = fieldValues
                         };
@@ -48,9 +48,9 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     var queryRequest = new QueryRequest()
                     {
                         Fields = new List<FieldRef> {
-                        new FieldRef { Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD }
+                        new FieldRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD }
                     },
-                        ObjectType = new ObjectTypeRef { Guid = GlobalVariables.PROCESSING_FIELD_OBJECT }
+                        ObjectType = new ObjectTypeRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT }
                     };
 
                     QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, 1, 1000);
@@ -59,7 +59,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                     foreach (RelativityObject resultObject in queryResult.Objects)
                     {
-                        FieldValuePair fieldPair = resultObject[GlobalVariables.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD];
+                        FieldValuePair fieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD];
 
                         output.Add(fieldPair.Value.ToString());
                     }
