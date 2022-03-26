@@ -61,39 +61,48 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Failed to get Single ChoiceRef for Choice: {choiceName}: on Field: {fieldGuid} in Workspace: {workspaceArtifactId}");
+                logger.LogError(e, "Failed to get Single ChoiceRef for Choice: {choiceName}: on Field: {singleChoiceFieldGuid} in Workspace: {workspaceArtifactId}", choiceName, singleChoiceFieldGuid, workspaceArtifactId);
             }
-            return null;
+            return new ChoiceRef();
         }
 
         public async Task<List<ChoiceRef>> GetMultipleChoiceRefsByNameAsync(IHelper helper, int workspaceArtifactId, Guid multipleChoiceFieldGuid, string[] choiceNames, IAPILog logger)
         {
-            ProcessingFieldObject processingFieldObject = new ProcessingFieldObject();
-            Dictionary<string, int> existingChoices = GetChoicesByField(helper, workspaceArtifactId, multipleChoiceFieldGuid, logger);
-            List<ChoiceRef> choiceRefs = new List<ChoiceRef>();
-
-            if (choiceNames != null)
+            try
             {
-                foreach (string choice in choiceNames)
-                {
-                    int mappedFieldArtifactId;
-                    if (existingChoices.ContainsKey(choice))
-                    {
-                        existingChoices.TryGetValue(choice, out mappedFieldArtifactId);
-                    }
-                    else
-                    {
-                        mappedFieldArtifactId = await CreateChoiceAsync(helper, workspaceArtifactId, choice, multipleChoiceFieldGuid, logger);
-                    }
+                Dictionary<string, int> existingChoices = GetChoicesByField(helper, workspaceArtifactId, multipleChoiceFieldGuid, logger);
+                List<ChoiceRef> choiceRefs = new List<ChoiceRef>();
 
-                    choiceRefs.Add(new ChoiceRef { ArtifactID = mappedFieldArtifactId });
+                if (choiceNames != null)
+                {
+                    foreach (string choice in choiceNames)
+                    {
+                        int mappedFieldArtifactId;
+                        if (existingChoices.ContainsKey(choice))
+                        {
+                            existingChoices.TryGetValue(choice, out mappedFieldArtifactId);
+                        }
+                        else
+                        {
+                            mappedFieldArtifactId = await CreateChoiceAsync(helper, workspaceArtifactId, choice, multipleChoiceFieldGuid, logger);
+                        }
+
+                        choiceRefs.Add(new ChoiceRef { ArtifactID = mappedFieldArtifactId });
+                    }
                 }
+                return choiceRefs;
             }
-            return choiceRefs;
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to get Multiple ChoiceRefs for Choices: {choiceNames}: on Field: {multipleChoiceFieldGuid} in Workspace: {workspaceArtifactId}", choiceNames, multipleChoiceFieldGuid, workspaceArtifactId);
+            }
+            return new List<ChoiceRef>();
         }
         public Dictionary<string, int> GetChoicesByField(IHelper helper, int workspaceArtifactId, Guid fieldGuid, IAPILog logger)
         {
-            string sql = $@"
+            try
+            {
+                string sql = $@"
                 SELECT C.[ArtifactID],
                        C.[Name]
                 FROM   [Code] C
@@ -103,20 +112,26 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                          ON A.[ArtifactID] = F.[ArtifactID]
                 WHERE  A.[ArtifactGuid] = @FieldGuid";
 
-            var sqlParams = new List<SqlParameter>
+                var sqlParams = new List<SqlParameter>
             {
                 new SqlParameter("@FieldGuid", SqlDbType.UniqueIdentifier) {Value = fieldGuid}
             };
 
-            IDBContext dbContext = helper.GetDBContext(workspaceArtifactId);
-            DataTable resultDataTable = dbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
-            Dictionary<string, int> choices = new Dictionary<string, int>();
+                IDBContext dbContext = helper.GetDBContext(workspaceArtifactId);
+                DataTable resultDataTable = dbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
+                Dictionary<string, int> choices = new Dictionary<string, int>();
 
-            foreach (DataRow row in resultDataTable.Rows)
-            {
-                choices.Add((string)row["Name"], (int)row["ArtifactID"]);
+                foreach (DataRow row in resultDataTable.Rows)
+                {
+                    choices.Add((string)row["Name"], (int)row["ArtifactID"]);
+                }
+                return choices;
             }
-            return choices;
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to get Choices for Field: {fieldGuid} in Workspace: {workspaceArtifactId}", fieldGuid, workspaceArtifactId);
+            }
+            return new Dictionary<string, int>();
         }
     }
 }
