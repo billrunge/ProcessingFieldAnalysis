@@ -12,7 +12,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class Workspace
     {
-        public DataTable RetrieveApplicationWorkspaces(IDBContext eddsDbContext)
+        public List<int> RetrieveWorkspacesWhereApplicationIsInstalled(IDBContext eddsDbContext)
         {
             string sql = $@"
                     SELECT [CaseID]
@@ -29,7 +29,15 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 new SqlParameter("@applicationGuid", SqlDbType.UniqueIdentifier) {Value = GlobalVariables.PROCESSING_FIELD_APPLICATION_GUID}
             };
 
-            return eddsDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
+            DataTable installedWorkspacesDataTable = eddsDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
+            List<int> installedWorkspaceArtifactIds = new List<int>();
+
+            foreach (DataRow workspaceArtifactIdRow in installedWorkspacesDataTable.Rows)
+            {
+                installedWorkspaceArtifactIds.Add((int)workspaceArtifactIdRow["CaseID"]);
+            }
+
+            return installedWorkspaceArtifactIds;
         }
 
         public int GetArtifactIdByGuid(IHelper helper, int workspaceArtifactId, Guid guid)

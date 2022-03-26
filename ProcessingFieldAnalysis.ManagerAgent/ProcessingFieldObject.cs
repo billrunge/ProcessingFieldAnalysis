@@ -4,8 +4,6 @@ using Relativity.ObjectManager.V1.Models;
 using Relativity.Services.FieldMapping;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,60 +46,22 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             return null;
         }
-
-        public Dictionary<string,int> GetFieldChoiceNames(IHelper helper, int workspaceArtifactId, Guid fieldGuid, IAPILog logger)
+        public async Task PopulateProcessingFieldObjectAsync(IHelper helper, IAPILog logger)
         {
-            string sql = $@"
-                SELECT C.[ArtifactID],
-                       C.[Name]
-                FROM   [Code] C
-                       JOIN [Field] F
-                         ON F.[CodeTypeID] = C.[CodeTypeID]
-                       JOIN [ArtifactGuid] A
-                         ON A.[ArtifactID] = F.[ArtifactID]
-                WHERE  A.[ArtifactGuid] = @FieldGuid";
-
-            var sqlParams = new List<SqlParameter>
-            {
-                new SqlParameter("@FieldGuid", SqlDbType.UniqueIdentifier) {Value = fieldGuid}
-            };
-
-            IDBContext dbContext = helper.GetDBContext(workspaceArtifactId);
-            DataTable resultDataTable = dbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
-            Dictionary<string, int> choices = new Dictionary<string, int>();
-            foreach (DataRow row in resultDataTable.Rows)
-            {
-                choices.Add((string)row["Name"],(int)row["ArtifactID"]);
-            }
-            return choices;
-        }
-
-        public async Task PopulateProcessingFieldAsync(IHelper helper, IAPILog logger)
-        {
-            List<FieldRef> fields = new List<FieldRef>()
-                {
-                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_SOURCE_NAME_HASH_FIELD },
-                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_FRIENDLY_NAME_FIELD },
-                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD },
-                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_DESCRIPTION_FIELD },
-                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_MINIMUM_LENGTH_FIELD },
-                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD },
-                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD },
-                    new FieldRef{ Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD }
-                };
-
             //helpers
             InvariantField invariantField = new InvariantField();
             ProcessingFieldObject processingFieldObject = new ProcessingFieldObject();
             Workspace appWorkspace = new Workspace();
             Choice choice = new Choice();
             ProcessingField processingField = new ProcessingField();
+            Field field = new Field();
 
-            DataTable installedWorkspaceArtifactIds = appWorkspace.RetrieveApplicationWorkspaces(helper.GetDBContext(-1));
+            List<FieldRef> fields = field.fields;
 
-            foreach (DataRow workspaceArtifactIdRow in installedWorkspaceArtifactIds.Rows)
+            List<int> installedWorkspaceArtifactIds = appWorkspace.RetrieveWorkspacesWhereApplicationIsInstalled(helper.GetDBContext(-1));
+
+            foreach (int workspaceArtifactId in installedWorkspaceArtifactIds)
             {
-                int workspaceArtifactId = (int)workspaceArtifactIdRow["CaseID"];
 
                 MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(helper, workspaceArtifactId, logger);
                 List<string> existingProcessingFields = await processingFieldObject.GetProcessingFieldNameListFromWorkspace(helper, workspaceArtifactId, logger);
@@ -110,61 +70,17 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 foreach (MappableSourceField mappableSourceField in mappableSourceFields)
                 {
                     if (!existingProcessingFields.Contains(mappableSourceField.SourceName))
-                    {
-                        Dictionary<string, int> existingCategoryChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD, logger);
-                        Dictionary<string, int> existingDataTypeChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD, logger);
-                        Dictionary<string, int> existingMappedFieldsChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD, logger);
-
-                        int categoryChoiceArtifactId;
-                        int dataTypeChoiceArtifactId;
-                        List<ChoiceRef> mappedFieldsChoiceRefs = new List<ChoiceRef>();
-
-                        if (existingDataTypeChoices.ContainsKey(mappableSourceField.DataType))
-                        {
-                            existingDataTypeChoices.TryGetValue(mappableSourceField.DataType, out dataTypeChoiceArtifactId);
-                        }
-                        else
-                        {
-                            dataTypeChoiceArtifactId = await choice.CreateChoiceAsync(helper, workspaceArtifactId, mappableSourceField.DataType, GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD);
-                        }
-
-                        if (existingCategoryChoices.ContainsKey(mappableSourceField.Category))
-                        {
-                            existingCategoryChoices.TryGetValue(mappableSourceField.Category, out categoryChoiceArtifactId);
-                        }
-                        else
-                        {
-                            categoryChoiceArtifactId = await choice.CreateChoiceAsync(helper, workspaceArtifactId, mappableSourceField.Category, GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD);
-                        }
-
-                        if (mappableSourceField.MappedFields != null)
-                        {
-                            foreach (string mappedField in mappableSourceField.MappedFields)
-                            {
-                                int mappedFieldArtifactId;
-                                if (existingMappedFieldsChoices.ContainsKey(mappedField))
-                                {
-                                    existingMappedFieldsChoices.TryGetValue(mappedField, out mappedFieldArtifactId);
-                                }
-                                else
-                                {
-                                    mappedFieldArtifactId = await choice.CreateChoiceAsync(helper, workspaceArtifactId, mappedField, GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD);
-                                }
-
-                                mappedFieldsChoiceRefs.Add(new ChoiceRef { ArtifactID = mappedFieldArtifactId });
-                            }
-                        }
-
+                    {              
                         IReadOnlyList<object> fieldValue = new List<object>()
                             {
                                 ComputeHashString(mappableSourceField.SourceName),
                                 mappableSourceField.FriendlyName,
-                                new ChoiceRef { ArtifactID = categoryChoiceArtifactId },
+                                await choice.GetSingleChoiceChoiceRefByNameAsync(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD, mappableSourceField.Category, logger),
                                 mappableSourceField.Description,
                                 mappableSourceField.Length,
-                                new ChoiceRef { ArtifactID = dataTypeChoiceArtifactId },
+                                await choice.GetSingleChoiceChoiceRefByNameAsync(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD, mappableSourceField.DataType, logger),
                                 mappableSourceField.SourceName,
-                                mappedFieldsChoiceRefs
+                                await choice.GetMultipleChoiceRefsByNameAsync(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD, mappableSourceField.MappedFields, logger)
                             };
                         fieldValues.Add(fieldValue);
                     }

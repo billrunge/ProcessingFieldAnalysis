@@ -20,7 +20,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ProcessingFieldObject processingFieldObject = new ProcessingFieldObject();
-                await processingFieldObject.PopulateProcessingFieldAsync(Helper, logger);
+                await processingFieldObject.PopulateProcessingFieldObjectAsync(Helper, logger);
                 RaiseMessage("Completed.", 1);
             }
             catch (Exception ex)
