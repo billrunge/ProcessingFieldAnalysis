@@ -14,37 +14,6 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class ProcessingFieldObject
     {
-        public async Task<Relativity.ObjectManager.V1.Models.MassCreateResult> CreateProcessingFieldObjects(IHelper helper, int workspaceArtifactId, IAPILog logger, IReadOnlyList<Relativity.ObjectManager.V1.Models.FieldRef> fields, IReadOnlyList<IReadOnlyList<object>> fieldValues)
-        {
-            using (IObjectManager objectManager = helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
-            {
-                try
-                {
-                    if (fieldValues.Count > 0)
-                    {
-                        var massCreateRequest = new Relativity.ObjectManager.V1.Models.MassCreateRequest
-                        {
-                            ObjectType = new Relativity.ObjectManager.V1.Models.ObjectTypeRef { Guid = GlobalVariables.PROCESSING_FIELD_OBJECT },
-                            Fields = fields,
-                            ValueLists = fieldValues
-                        };
-
-                        return await objectManager.CreateAsync(workspaceArtifactId, massCreateRequest);
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-                catch (Exception exception)
-                {
-                    logger.LogError(exception, "The Relativity Object could not be created.");
-                }
-
-            }
-            return null;
-        }
-
         public async Task<List<string>> GetProcessingFieldNameListFromWorkspace(IHelper helper, int workspaceArtifactId, IAPILog logger)
         {
             using (IObjectManager objectManager = helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
@@ -126,6 +95,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             ProcessingFieldObject processingFieldObject = new ProcessingFieldObject();
             Workspace appWorkspace = new Workspace();
             Choice choice = new Choice();
+            ProcessingField processingField = new ProcessingField();
 
             DataTable installedWorkspaceArtifactIds = appWorkspace.RetrieveApplicationWorkspaces(helper.GetDBContext(-1));
 
@@ -134,23 +104,16 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 int workspaceArtifactId = (int)workspaceArtifactIdRow["CaseID"];
 
                 MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(helper, workspaceArtifactId, logger);
-
-                List<string> existingProcessingFields = new List<string>();
-                existingProcessingFields = await processingFieldObject.GetProcessingFieldNameListFromWorkspace(helper, workspaceArtifactId, logger);
+                List<string> existingProcessingFields = await processingFieldObject.GetProcessingFieldNameListFromWorkspace(helper, workspaceArtifactId, logger);
 
                 List<IReadOnlyList<object>> fieldValues = new List<IReadOnlyList<object>>();
                 foreach (MappableSourceField mappableSourceField in mappableSourceFields)
                 {
                     if (!existingProcessingFields.Contains(mappableSourceField.SourceName))
                     {
-                        Dictionary<string, int> existingCategoryChoices = new Dictionary<string, int>();
-                        existingCategoryChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD, logger);
-
-                        Dictionary<string, int> existingDataTypeChoices = new Dictionary<string, int>();
-                        existingDataTypeChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD, logger);
-
-                        Dictionary<string, int> existingMappedFieldsChoices = new Dictionary<string, int>();
-                        existingMappedFieldsChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD, logger);
+                        Dictionary<string, int> existingCategoryChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD, logger);
+                        Dictionary<string, int> existingDataTypeChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD, logger);
+                        Dictionary<string, int> existingMappedFieldsChoices = processingFieldObject.GetFieldChoiceNames(helper, workspaceArtifactId, GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD, logger);
 
                         int categoryChoiceArtifactId;
                         int dataTypeChoiceArtifactId;
@@ -206,19 +169,16 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         fieldValues.Add(fieldValue);
                     }
                 }
-                await processingFieldObject.CreateProcessingFieldObjects(helper, workspaceArtifactId, logger, fields, fieldValues);
+                await processingField.CreateProcessingFieldObjects(helper, workspaceArtifactId, logger, fields, fieldValues);
             }
         }
 
         static string ComputeHashString(string rawData)
-        {
-            // Create a SHA256   
+        {  
             using (SHA512 sha512Hash = SHA512.Create())
             {
-                // ComputeHash - returns byte array  
                 byte[] bytes = sha512Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
 
-                // Convert byte array to a string   
                 StringBuilder builder = new StringBuilder();
                 for (int i = 0; i < bytes.Length; i++)
                 {
