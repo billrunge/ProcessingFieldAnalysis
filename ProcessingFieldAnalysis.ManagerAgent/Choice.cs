@@ -14,7 +14,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
     class Choice
     {
         /// <summary>
-        /// Use Choice Manager to create a Choice for a given Field (identified by Guid)
+        /// Creates a Choice for a given Field (identified by Guid)
         /// </summary>
         public async Task<int> CreateChoiceAsync(IHelper helper, int workspaceArtifactId, string choiceName, Guid fieldGuid, IAPILog logger)
         {
@@ -38,9 +38,9 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         }
         /// <summary>
         /// Takes a Field Guid and a Choice name, checks if there is a Choice that
-        /// already exists with that name for that Field, and if so returns its Artifact ID
-        /// If there is not Choice on the Field with the supplied name, it will create the Choice 
-        /// and return the new Choice's Artifact ID
+        /// already exists with that name for that Field, and if so returns its ChoiceRef
+        /// If there is not Choice on the Field with he supplied name, it will create the Choice 
+        /// and return the new Choice's ChoiceRef
         /// </summary>
         public async Task<ChoiceRef> GetSingleChoiceChoiceRefByNameAsync(IHelper helper, int workspaceArtifactId, Guid singleChoiceFieldGuid, string choiceName, IAPILog logger)
         {
@@ -65,7 +65,12 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             return new ChoiceRef();
         }
-
+        /// <summary>
+        /// Takes a Field Guid and an array of Choice names, checks if there are Choices that
+        /// already exists with those names for that Field, and if so returns a list of those ChoiceRefs
+        /// If there is not Choice on the Field with the supplied name, it will create the Choice 
+        /// and return the new Choice's ChoiceRef in the output list
+        /// </summary>
         public async Task<List<ChoiceRef>> GetMultipleChoiceRefsByNameAsync(IHelper helper, int workspaceArtifactId, Guid multipleChoiceFieldGuid, string[] choiceNames, IAPILog logger)
         {
             try
