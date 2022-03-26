@@ -103,6 +103,10 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             return new List<ChoiceRef>();
         }
+        /// <summary>
+        /// Gets a list of Choice names associated with a specific Field (identified by Guid)
+        /// Currently uses SQL, but would like to replace with API
+        /// </summary>
         public Dictionary<string, int> GetChoicesByField(IHelper helper, int workspaceArtifactId, Guid fieldGuid, IAPILog logger)
         {
             try
