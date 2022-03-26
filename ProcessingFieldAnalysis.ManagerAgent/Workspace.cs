@@ -1,18 +1,14 @@
 ﻿using Relativity.API;
-using Relativity.ObjectModel.V1.Choice;
-using Relativity.ObjectModel.V1.Choice.Models;
-using Relativity.Shared.V1.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Threading.Tasks;
 
 namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class Workspace
     {
-        public List<int> RetrieveWorkspacesWhereApplicationIsInstalled(IDBContext eddsDbContext)
+        public List<int> GetWorkspaceArtifactIdsWhereApplicationIsInstalled(IDBContext eddsDbContext)
         {
             string sql = $@"
                     SELECT [CaseID]

@@ -13,32 +13,57 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class Choice
     {
-        public async Task<int> CreateChoiceAsync(IHelper helper, int workspaceArtifactId, string choiceName, Guid fieldGuid)
+        /// <summary>
+        /// Use Choice Manager to create a Choice for a given Field (identified by Guid)
+        /// </summary>
+        public async Task<int> CreateChoiceAsync(IHelper helper, int workspaceArtifactId, string choiceName, Guid fieldGuid, IAPILog logger)
         {
-            using (IChoiceManager choiceManager = helper.GetServicesManager().CreateProxy<IChoiceManager>(ExecutionIdentity.CurrentUser))
+            try
             {
-                ChoiceRequest choiceRequest = new ChoiceRequest()
+                using (IChoiceManager choiceManager = helper.GetServicesManager().CreateProxy<IChoiceManager>(ExecutionIdentity.CurrentUser))
                 {
-                    Name = choiceName,
-                    Field = new ObjectIdentifier() { Guids = new List<Guid>() { fieldGuid } },
-                };
-                return await choiceManager.CreateAsync(workspaceArtifactId, choiceRequest);
+                    ChoiceRequest choiceRequest = new ChoiceRequest()
+                    {
+                        Name = choiceName,
+                        Field = new ObjectIdentifier() { Guids = new List<Guid>() { fieldGuid } },
+                    };
+                    return await choiceManager.CreateAsync(workspaceArtifactId, choiceRequest);
+                }
             }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to create Choice: {choiceName} on Field: {fieldGuid} in Workspace: {workspaceArtifactId}", choiceName, fieldGuid, workspaceArtifactId);
+            }
+            return 0;
         }
+        /// <summary>
+        /// Takes a Field Guid and a Choice name, checks if there is a Choice that
+        /// already exists with that name for that Field, and if so returns its Artifact ID
+        /// If there is not Choice on the Field with the supplied name, it will create the Choice 
+        /// and return the new Choice's Artifact ID
+        /// </summary>
         public async Task<ChoiceRef> GetSingleChoiceChoiceRefByNameAsync(IHelper helper, int workspaceArtifactId, Guid singleChoiceFieldGuid, string choiceName, IAPILog logger)
         {
-            Dictionary<string, int> existingChoices = GetChoicesByField(helper, workspaceArtifactId, singleChoiceFieldGuid, logger);
-            int choiceArtifactId;
+            try
+            {
+                Dictionary<string, int> existingChoices = GetChoicesByField(helper, workspaceArtifactId, singleChoiceFieldGuid, logger);
+                int choiceArtifactId;
 
-            if (existingChoices.ContainsKey(choiceName))
-            {
-                existingChoices.TryGetValue(choiceName, out choiceArtifactId);
+                if (existingChoices.ContainsKey(choiceName))
+                {
+                    existingChoices.TryGetValue(choiceName, out choiceArtifactId);
+                }
+                else
+                {
+                    choiceArtifactId = await CreateChoiceAsync(helper, workspaceArtifactId, choiceName, singleChoiceFieldGuid, logger);
+                }
+                return new ChoiceRef { ArtifactID = choiceArtifactId };
             }
-            else
+            catch (Exception e)
             {
-                choiceArtifactId = await CreateChoiceAsync(helper, workspaceArtifactId, choiceName, singleChoiceFieldGuid);
+                logger.LogError(e, "Failed to get Single ChoiceRef for Choice: {choiceName}: on Field: {fieldGuid} in Workspace: {workspaceArtifactId}");
             }
-            return new ChoiceRef { ArtifactID = choiceArtifactId };
+            return null;
         }
 
         public async Task<List<ChoiceRef>> GetMultipleChoiceRefsByNameAsync(IHelper helper, int workspaceArtifactId, Guid multipleChoiceFieldGuid, string[] choiceNames, IAPILog logger)
@@ -58,7 +83,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     }
                     else
                     {
-                        mappedFieldArtifactId = await CreateChoiceAsync(helper, workspaceArtifactId, choice, multipleChoiceFieldGuid);
+                        mappedFieldArtifactId = await CreateChoiceAsync(helper, workspaceArtifactId, choice, multipleChoiceFieldGuid, logger);
                     }
 
                     choiceRefs.Add(new ChoiceRef { ArtifactID = mappedFieldArtifactId });

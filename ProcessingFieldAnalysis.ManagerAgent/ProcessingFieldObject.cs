@@ -1,8 +1,6 @@
 ﻿using Relativity.API;
-using Relativity.ObjectManager.V1.Interfaces;
 using Relativity.ObjectManager.V1.Models;
 using Relativity.Services.FieldMapping;
-using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
@@ -12,59 +10,24 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class ProcessingFieldObject
     {
-        public async Task<List<string>> GetProcessingFieldNameListFromWorkspace(IHelper helper, int workspaceArtifactId, IAPILog logger)
-        {
-            using (IObjectManager objectManager = helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
-            {
-                try
-                {
-                    var queryRequest = new QueryRequest()
-                    {
-                        Fields = new List<FieldRef> {
-                        new FieldRef { Guid = GlobalVariables.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD }
-                    },
-                        ObjectType = new Relativity.ObjectManager.V1.Models.ObjectTypeRef { Guid = GlobalVariables.PROCESSING_FIELD_OBJECT }
-                    };
-
-                    QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, 1, 1000);
-
-                    List<string> output = new List<string>();
-
-                    foreach (RelativityObject resultObject in queryResult.Objects)
-                    {
-                        FieldValuePair fieldPair = resultObject[GlobalVariables.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD];
-                        
-                        output.Add(fieldPair.Value.ToString());
-                    }
-
-                    return output;
-                }
-                catch(Exception exception)
-                {
-                    logger.LogError(exception, "Unable to get a list of Processing Field Names from the Workspace Processing Field Object");
-                }
-            }
-            return null;
-        }
         public async Task PopulateProcessingFieldObjectAsync(IHelper helper, IAPILog logger)
         {
             //helpers
             InvariantField invariantField = new InvariantField();
-            ProcessingFieldObject processingFieldObject = new ProcessingFieldObject();
-            Workspace appWorkspace = new Workspace();
+            Workspace workspace = new Workspace();
             Choice choice = new Choice();
             ProcessingField processingField = new ProcessingField();
             Field field = new Field();
 
             List<FieldRef> fields = field.fields;
 
-            List<int> installedWorkspaceArtifactIds = appWorkspace.RetrieveWorkspacesWhereApplicationIsInstalled(helper.GetDBContext(-1));
+            List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled(helper.GetDBContext(-1));
 
             foreach (int workspaceArtifactId in installedWorkspaceArtifactIds)
             {
 
                 MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(helper, workspaceArtifactId, logger);
-                List<string> existingProcessingFields = await processingFieldObject.GetProcessingFieldNameListFromWorkspace(helper, workspaceArtifactId, logger);
+                List<string> existingProcessingFields = await processingField.GetProcessingFieldNamesAsync(helper, workspaceArtifactId, logger);
 
                 List<IReadOnlyList<object>> fieldValues = new List<IReadOnlyList<object>>();
                 foreach (MappableSourceField mappableSourceField in mappableSourceFields)
