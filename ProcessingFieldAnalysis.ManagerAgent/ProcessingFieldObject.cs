@@ -124,7 +124,8 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             //helpers
             InvariantField invariantField = new InvariantField();
             ProcessingFieldObject processingFieldObject = new ProcessingFieldObject();
-            ApplicationWorkspace appWorkspace = new ApplicationWorkspace();
+            Workspace appWorkspace = new Workspace();
+            Choice choice = new Choice();
 
             DataTable installedWorkspaceArtifactIds = appWorkspace.RetrieveApplicationWorkspaces(helper.GetDBContext(-1));
 
@@ -161,7 +162,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         }
                         else
                         {
-                            dataTypeChoiceArtifactId = await appWorkspace.CreateChoiceAsync(helper, workspaceArtifactId, mappableSourceField.DataType, GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD);
+                            dataTypeChoiceArtifactId = await choice.CreateChoiceAsync(helper, workspaceArtifactId, mappableSourceField.DataType, GlobalVariables.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD);
                         }
 
                         if (existingCategoryChoices.ContainsKey(mappableSourceField.Category))
@@ -170,7 +171,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         }
                         else
                         {
-                            categoryChoiceArtifactId = await appWorkspace.CreateChoiceAsync(helper, workspaceArtifactId, mappableSourceField.Category, GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD);
+                            categoryChoiceArtifactId = await choice.CreateChoiceAsync(helper, workspaceArtifactId, mappableSourceField.Category, GlobalVariables.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD);
                         }
 
                         if (mappableSourceField.MappedFields != null)
@@ -184,7 +185,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                                 }
                                 else
                                 {
-                                    mappedFieldArtifactId = await appWorkspace.CreateChoiceAsync(helper, workspaceArtifactId, mappedField, GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD);
+                                    mappedFieldArtifactId = await choice.CreateChoiceAsync(helper, workspaceArtifactId, mappedField, GlobalVariables.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD);
                                 }
 
                                 mappedFieldsChoiceRefs.Add(new ChoiceRef { ArtifactID = mappedFieldArtifactId });

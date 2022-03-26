@@ -72,7 +72,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApplicationWorkspace.cs" />
+    <Compile Include="Choice.cs" />
+    <Compile Include="Workspace.cs" />
     <Compile Include="GlobalVariables.cs" />
     <Compile Include="InvariantField.cs" />
     <Compile Include="ProcessingFieldAnalysisManagerAgent.cs" />

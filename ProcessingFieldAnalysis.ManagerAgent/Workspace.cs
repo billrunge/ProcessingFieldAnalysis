@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ProcessingFieldAnalysis.ManagerAgent
 {
-    class ApplicationWorkspace
+    class Workspace
     {
         public DataTable RetrieveApplicationWorkspaces(IDBContext eddsDbContext)
         {
@@ -49,17 +49,17 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             return (int)dbContext.ExecuteSqlStatementAsScalar(sql, sqlParams);
         }
 
-        public async Task<int> CreateChoiceAsync(IHelper helper, int workspaceArtifactId, string choiceName, Guid fieldGuid)
-        {
-            using (IChoiceManager choiceManager = helper.GetServicesManager().CreateProxy<IChoiceManager>(ExecutionIdentity.CurrentUser))
-            {
-                ChoiceRequest choiceRequest = new ChoiceRequest()
-                {
-                    Name = choiceName,
-                    Field = new ObjectIdentifier() { Guids =  new List<Guid>() { fieldGuid } },
-                };
-                return await choiceManager.CreateAsync(workspaceArtifactId, choiceRequest);
-            }
-        }
+        //public async Task<int> CreateChoiceAsync(IHelper helper, int workspaceArtifactId, string choiceName, Guid fieldGuid)
+        //{
+        //    using (IChoiceManager choiceManager = helper.GetServicesManager().CreateProxy<IChoiceManager>(ExecutionIdentity.CurrentUser))
+        //    {
+        //        ChoiceRequest choiceRequest = new ChoiceRequest()
+        //        {
+        //            Name = choiceName,
+        //            Field = new ObjectIdentifier() { Guids =  new List<Guid>() { fieldGuid } },
+        //        };
+        //        return await choiceManager.CreateAsync(workspaceArtifactId, choiceRequest);
+        //    }
+        //}
     }
 }
