@@ -30,8 +30,9 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 foreach (int workspaceArtifactId in installedWorkspaceArtifactIds)
                 {
                     MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(Helper, workspaceArtifactId, logger);
-                    List<MappableSourceField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableSourceFieldsAsync(Helper, workspaceArtifactId, logger);
+                    List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(Helper, workspaceArtifactId, logger);
                     await processingFieldObject.PopulateProcessingFieldObjectAsync(Helper, workspaceArtifactId, mappableSourceFields, existingProcessingFields, logger);
+                    await processingFieldObject.UpdateProcessingFieldObjectAsync(Helper, workspaceArtifactId, mappableSourceFields, existingProcessingFields, logger);
                 }
 
                 RaiseMessage("Completed.", 1);

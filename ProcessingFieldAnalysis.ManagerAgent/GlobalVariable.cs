@@ -11,6 +11,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         public static readonly Guid PROCESSING_FIELD_OBJECT = new Guid("9122C660-2ED7-4BF2-B44E-C168AC4F06AE");
 
         //Fields
+        public static readonly Guid PROCESSING_FIELD_OBJECT_ARTIFACT_ID_FIELD = new Guid("00D9FBCD-8CE0-4A27-AA35-0ED714271B60");
         public static readonly Guid PROCESSING_FIELD_OBJECT_SOURCE_NAME_HASH_FIELD = new Guid("B58ECA21-6B7D-476D-AD9F-CBC673901F20");
         public static readonly Guid PROCESSING_FIELD_OBJECT_FRIENDLY_NAME_FIELD = new Guid("0017BF05-8DAA-4381-B346-9EDC59E39F29");
         public static readonly Guid PROCESSING_FIELD_OBJECT_CATEGORY_FIELD = new Guid("D8F957D6-1FFA-45C3-91FA-F1212F8BAF1B");
