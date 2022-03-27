@@ -8,9 +8,17 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class Workspace
     {
-        public List<int> GetWorkspaceArtifactIdsWhereApplicationIsInstalled(IDBContext eddsDbContext)
+        /// <summary>
+        /// Retrieves a list of Workspace Artifact IDs where the Processing Field Application is installed.
+        /// Currently uses DB context, would like to replace with API.
+        /// </summary>
+        /// <param name="eddsDbContext"></param>
+        /// <returns></returns>
+        public List<int> GetWorkspaceArtifactIdsWhereApplicationIsInstalled(IDBContext eddsDbContext, IAPILog logger)
         {
-            string sql = $@"
+            try
+            {
+                string sql = $@"
                     SELECT [CaseID]
                     FROM   [EDDS].[eddsdbo].[CaseApplication] C
                            JOIN [EDDS].[eddsdbo].[ApplicationInstall] A
@@ -20,23 +28,35 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     WHERE  LA.[Guid] = @applicationGuid
                            AND [CaseID] <> -1";
 
-            var sqlParams = new List<SqlParameter>
+                var sqlParams = new List<SqlParameter>
             {
                 new SqlParameter("@applicationGuid", SqlDbType.UniqueIdentifier) {Value = GlobalVariable.PROCESSING_FIELD_APPLICATION_GUID}
             };
 
-            DataTable installedWorkspacesDataTable = eddsDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
-            List<int> installedWorkspaceArtifactIds = new List<int>();
+                DataTable installedWorkspacesDataTable = eddsDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
+                List<int> installedWorkspaceArtifactIds = new List<int>();
 
-            foreach (DataRow workspaceArtifactIdRow in installedWorkspacesDataTable.Rows)
+                foreach (DataRow workspaceArtifactIdRow in installedWorkspacesDataTable.Rows)
+                {
+                    installedWorkspaceArtifactIds.Add((int)workspaceArtifactIdRow["CaseID"]);
+                }
+
+                return installedWorkspaceArtifactIds;
+            } catch (Exception e)
             {
-                installedWorkspaceArtifactIds.Add((int)workspaceArtifactIdRow["CaseID"]);
+                logger.LogError(e, "Error occurred getting list of Workspace Artifact IDs where the Processing Field Application is installed.");
             }
-
-            return installedWorkspaceArtifactIds;
+            return new List<int>();
         }
-
-        public int GetArtifactIdByGuid(IHelper helper, int workspaceArtifactId, Guid guid)
+        /// <summary>
+        /// Gets Artifact ID for a give Guid
+        /// Uses DB context, would like to replace with API.
+        /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="workspaceArtifactId"></param>
+        /// <param name="guid"></param>
+        /// <returns></returns>
+        public int GetArtifactIdByGuid(IHelper helper, int workspaceArtifactId, Guid guid, IAPILog logger)
         {
             string sql = $@"
                     SELECT TOP 1 [ArtifactID]
@@ -47,10 +67,16 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             {
                 new SqlParameter("@Guid", SqlDbType.UniqueIdentifier) {Value = guid}
             };
-
-            IDBContext dbContext = helper.GetDBContext(workspaceArtifactId);
-
-            return (int)dbContext.ExecuteSqlStatementAsScalar(sql, sqlParams);
+            try
+            {
+                IDBContext dbContext = helper.GetDBContext(workspaceArtifactId);
+                return (int)dbContext.ExecuteSqlStatementAsScalar(sql, sqlParams);
+            } 
+            catch(Exception e)
+            {
+                logger.LogError(e, "Failed to get Artifact ID for Guid: {guid} in Workspace: {workspaceArtifactId}", guid, workspaceArtifactId);
+            }
+            return 0;
         }
 
     }

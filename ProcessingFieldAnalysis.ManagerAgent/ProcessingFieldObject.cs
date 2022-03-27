@@ -1,15 +1,21 @@
 ﻿using Relativity.API;
 using Relativity.ObjectManager.V1.Models;
 using Relativity.Services.FieldMapping;
+using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class ProcessingFieldObject
     {
+        /// <summary>
+        /// This method populates the Processing Field Object by checking what Source Names exist 
+        /// in the Processing Field Object for a given Workspace and creates any that are missing
+        /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
         public async Task PopulateProcessingFieldObjectAsync(IHelper helper, IAPILog logger)
         {
             //helpers
@@ -18,25 +24,28 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             Choice choice = new Choice();
             ProcessingField processingField = new ProcessingField();
             Field field = new Field();
+            Hash hash = new Hash();
 
             List<FieldRef> fields = field.fields;
 
-            List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled(helper.GetDBContext(-1));
-
-            foreach (int workspaceArtifactId in installedWorkspaceArtifactIds)
+            try
             {
+                List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled(helper.GetDBContext(-1));
 
-                MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(helper, workspaceArtifactId, logger);
-                List<string> existingProcessingFields = await processingField.GetProcessingFieldNamesAsync(helper, workspaceArtifactId, logger);
-
-                List<IReadOnlyList<object>> fieldValues = new List<IReadOnlyList<object>>();
-                foreach (MappableSourceField mappableSourceField in mappableSourceFields)
+                foreach (int workspaceArtifactId in installedWorkspaceArtifactIds)
                 {
-                    if (!existingProcessingFields.Contains(mappableSourceField.SourceName))
-                    {              
-                        IReadOnlyList<object> fieldValue = new List<object>()
+
+                    MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(helper, workspaceArtifactId, logger);
+                    List<string> existingProcessingFields = await processingField.GetProcessingFieldSourceNamesAsync(helper, workspaceArtifactId, logger);
+
+                    List<IReadOnlyList<object>> fieldValues = new List<IReadOnlyList<object>>();
+                    foreach (MappableSourceField mappableSourceField in mappableSourceFields)
+                    {
+                        if (!existingProcessingFields.Contains(mappableSourceField.SourceName))
+                        {
+                            IReadOnlyList<object> fieldValue = new List<object>()
                             {
-                                ComputeHashString(mappableSourceField.SourceName),
+                                hash.GetHash(mappableSourceField.SourceName, logger),
                                 mappableSourceField.FriendlyName,
                                 await choice.GetSingleChoiceChoiceRefByNameAsync(helper, workspaceArtifactId, GlobalVariable.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD, mappableSourceField.Category, logger),
                                 mappableSourceField.Description,
@@ -45,25 +54,14 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                                 mappableSourceField.SourceName,
                                 await choice.GetMultipleChoiceRefsByNameAsync(helper, workspaceArtifactId, GlobalVariable.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD, mappableSourceField.MappedFields, logger)
                             };
-                        fieldValues.Add(fieldValue);
+                            fieldValues.Add(fieldValue);
+                        }
                     }
+                    await processingField.CreateProcessingFieldObjects(helper, workspaceArtifactId, logger, fields, fieldValues);
                 }
-                await processingField.CreateProcessingFieldObjects(helper, workspaceArtifactId, logger, fields, fieldValues);
-            }
-        }
-
-        static string ComputeHashString(string rawData)
-        {  
-            using (SHA512 sha512Hash = SHA512.Create())
+            } catch(Exception e)
             {
-                byte[] bytes = sha512Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
-
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
+                logger.LogError(e, "Error occurred while populating the Processing Field Object");
             }
         }
     }
