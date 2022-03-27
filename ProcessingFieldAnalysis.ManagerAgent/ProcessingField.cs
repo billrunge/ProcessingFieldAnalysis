@@ -1,6 +1,7 @@
 ﻿using Relativity.API;
 using Relativity.ObjectManager.V1.Interfaces;
 using Relativity.ObjectManager.V1.Models;
+using Relativity.Services.FieldMapping;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -48,36 +49,54 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             return new MassCreateResult();
         }
+
         /// <summary>
-        /// Gets a list of Source Names for all instances of the Processing Field Object for a given Workspace.
+        /// Gets a list of Mappable Source Field Objects that corresponds with the current instances of the Processing Field Object for a given Workspace.
         /// </summary>
         /// <param name="helper"></param>
         /// <param name="workspaceArtifactId"></param>
         /// <param name="logger"></param>
         /// <returns>List<string></returns>
-        public async Task<List<string>> GetProcessingFieldSourceNamesAsync(IHelper helper, int workspaceArtifactId, IAPILog logger)
+        public async Task<List<MappableSourceField>> GetProcessingFieldObjectMappableSourceFieldsAsync(IHelper helper, int workspaceArtifactId, IAPILog logger)
         {
             using (IObjectManager objectManager = helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
             {
                 try
                 {
+                    Field field = new Field();
                     var queryRequest = new QueryRequest()
                     {
-                        Fields = new List<FieldRef> {
-                        new FieldRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD }
-                    },
+                        Fields = field.fields,
                         ObjectType = new ObjectTypeRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT }
                     };
+                    
+                    QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, 1, Int32.MaxValue);
 
-                    QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, 1, 1000);
-
-                    List<string> output = new List<string>();
+                    List<MappableSourceField> output = new List<MappableSourceField>();
 
                     foreach (RelativityObject resultObject in queryResult.Objects)
                     {
-                        FieldValuePair fieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD];
+                        FieldValuePair sourceNameFieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD];
+                        FieldValuePair friendlyNameFieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_FRIENDLY_NAME_FIELD];
+                        FieldValuePair categoryFieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_CATEGORY_FIELD];
+                        FieldValuePair descriptionFieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_DESCRIPTION_FIELD];
+                        FieldValuePair minimumLengthFieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_MINIMUM_LENGTH_FIELD];
+                        FieldValuePair dataTypeFieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD];
+                        FieldValuePair mappedFieldsFieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD];
 
-                        output.Add(fieldPair.Value.ToString());
+                        MappableSourceField mappableSourceField = new MappableSourceField
+                        {
+                            SourceName = sourceNameFieldPair.Value.ToString(),
+                            FriendlyName = friendlyNameFieldPair.Value.ToString(),
+                            Category = categoryFieldPair.Value.ToString(),
+                            Description = descriptionFieldPair.Value.ToString(),
+                            Length = (int)minimumLengthFieldPair.Value,
+                            DataType = dataTypeFieldPair.Value.ToString(),
+                            MappedFields = mappedFieldsFieldPair.Value.ToString().Split(',')
+                        };
+
+
+                        output.Add(mappableSourceField);
                     }
 
                     return output;
@@ -87,7 +106,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     logger.LogError(exception, "Unable to get a list of Source Names from the Proccesing Field Object in Workspace: {workspaceArtifactId}", workspaceArtifactId);
                 }
             }
-            return null;
+            return new List<MappableSourceField>();
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using kCura.Agent;
 using Relativity.API;
+using Relativity.Services.FieldMapping;
 using System;
+using System.Collections.Generic;
 using System.Net;
 
 namespace ProcessingFieldAnalysis.ManagerAgent
@@ -19,7 +21,19 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ProcessingFieldObject processingFieldObject = new ProcessingFieldObject();
-                await processingFieldObject.PopulateProcessingFieldObjectAsync(Helper, logger);
+                Workspace workspace = new Workspace();
+                InvariantField invariantField = new InvariantField();
+                ProcessingField processingField = new ProcessingField();
+
+                List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled(Helper.GetDBContext(-1), logger);
+
+                foreach (int workspaceArtifactId in installedWorkspaceArtifactIds)
+                {
+                    MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(Helper, workspaceArtifactId, logger);
+                    List<MappableSourceField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableSourceFieldsAsync(Helper, workspaceArtifactId, logger);
+                    await processingFieldObject.PopulateProcessingFieldObjectAsync(Helper, workspaceArtifactId, mappableSourceFields, existingProcessingFields, logger);
+                }
+
                 RaiseMessage("Completed.", 1);
             }
             catch (Exception e)
