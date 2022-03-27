@@ -30,7 +30,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
             try
             {
-                List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled(helper.GetDBContext(-1));
+                List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled(helper.GetDBContext(-1), logger);
 
                 foreach (int workspaceArtifactId in installedWorkspaceArtifactIds)
                 {
