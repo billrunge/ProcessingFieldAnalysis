@@ -115,12 +115,29 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         FieldValuePair dataTypeFieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD];
                         FieldValuePair mappedFieldsFieldPair = resultObject[GlobalVariable.PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD];
 
-                        Relativity.ObjectManager.V1.Models.Choice categoryChoice = (Relativity.ObjectManager.V1.Models.Choice)categoryFieldPair.Value;
-                        Relativity.ObjectManager.V1.Models.Choice dataTypeChoice = (Relativity.ObjectManager.V1.Models.Choice)dataTypeFieldPair.Value;
-                        List<Relativity.ObjectManager.V1.Models.Choice> mappedFields = new List<Relativity.ObjectManager.V1.Models.Choice>();
-                        mappedFields = (List<Relativity.ObjectManager.V1.Models.Choice>)mappedFieldsFieldPair.Value;
+                        Relativity.ObjectManager.V1.Models.Choice categoryChoice = new Relativity.ObjectManager.V1.Models.Choice();
 
-                        string[] mappedFieldNames = new string[] { };
+
+                        if (categoryFieldPair.Value != null)
+                        {
+                            categoryChoice = (Relativity.ObjectManager.V1.Models.Choice)categoryFieldPair.Value;
+                        }
+
+                        Relativity.ObjectManager.V1.Models.Choice dataTypeChoice = new Relativity.ObjectManager.V1.Models.Choice();
+
+                        if (dataTypeFieldPair != null)
+                        {
+                            dataTypeChoice = (Relativity.ObjectManager.V1.Models.Choice)dataTypeFieldPair.Value;
+                        }
+
+                        List<Relativity.ObjectManager.V1.Models.Choice> mappedFields = new List<Relativity.ObjectManager.V1.Models.Choice>();
+
+                        if (mappedFieldsFieldPair.Value != null)
+                        {
+                            mappedFields = (List<Relativity.ObjectManager.V1.Models.Choice>)mappedFieldsFieldPair.Value;
+                        }
+
+                        string[] mappedFieldNames = new string[0];
 
                         if (mappedFields.Count > 0)
                         {

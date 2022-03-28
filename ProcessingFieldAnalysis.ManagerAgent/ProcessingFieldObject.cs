@@ -58,7 +58,17 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 logger.LogError(e, "Error occurred while populating the Processing Field Object");
             }
         }
-
+        /// <summary>
+        /// This method checks all of the MappableFields returned by the Invariant Field Mapping API to MappableFields returned by Object Manager
+        /// from the Processing Field Object in the Workspace and compares each applicable property to check if any of the properties are different.
+        /// If so, it will update the applicable Processing Field OBject in the workspace
+        /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="workspaceArtifactId"></param>
+        /// <param name="mappableSourceFields"></param>
+        /// <param name="existingProcessingFields"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
         public async Task UpdateProcessingFieldObjectAsync(IHelper helper, int workspaceArtifactId, MappableSourceField[] mappableSourceFields, List<MappableField> existingProcessingFields, IAPILog logger)
         {
             //helpers
@@ -81,7 +91,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                     if (mappableField.Category != mappableSourceField.Category)
                     {
-                        logger.LogError("Categories {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.Category, mappableSourceField.Category, mappableField.ArtifactId);
+                        logger.LogDebug("Categories {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.Category, mappableSourceField.Category, mappableField.ArtifactId);
                         fieldRefValuePairs.Add(new FieldRefValuePair() { 
                             Field = new FieldRef 
                             { 
@@ -93,7 +103,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                     if (mappableField.DataType != mappableSourceField.DataType)
                     {
-                        logger.LogError("Data Types {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.DataType, mappableSourceField.DataType, mappableField.ArtifactId);
+                        logger.LogDebug("Data Types {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.DataType, mappableSourceField.DataType, mappableField.ArtifactId);
                         fieldRefValuePairs.Add(new FieldRefValuePair()
                         {
                             Field = new FieldRef
@@ -104,9 +114,9 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         });
                     }
 
-                    if (mappableField.Description != mappableSourceField.Description)
+                    if (NormalizeFieldValues(mappableField.Description) != NormalizeFieldValues(mappableSourceField.Description))
                     {
-                        logger.LogError("Descriptions are not equal for Processing Field: {artifactId}", mappableField.ArtifactId);
+                        logger.LogDebug("Descriptions are not equal for Processing Field: {artifactId}", mappableField.ArtifactId);
                         fieldRefValuePairs.Add(new FieldRefValuePair()
                         {
                             Field = new FieldRef
@@ -117,9 +127,9 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         });
                     }
 
-                    if (mappableField.FriendlyName != mappableSourceField.FriendlyName)
+                    if (NormalizeFieldValues(mappableField.FriendlyName) != NormalizeFieldValues(mappableSourceField.FriendlyName))
                     {
-                        logger.LogError("Friendly names {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.FriendlyName, mappableSourceField.FriendlyName, mappableField.ArtifactId);
+                        logger.LogDebug("Friendly names {0} and {1} are not equal for Processing Field: {artifactId}", NormalizeFieldValues(mappableField.FriendlyName), NormalizeFieldValues(mappableSourceField.FriendlyName), mappableField.ArtifactId);
                         fieldRefValuePairs.Add(new FieldRefValuePair()
                         {
                             Field = new FieldRef
@@ -136,7 +146,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     {
                         if (!mappableField.MappedFields.SequenceEqual(sourceMappedFields))
                         {
-                            logger.LogError("Mapped Fields {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.MappedFields, sourceMappedFields, mappableField.ArtifactId);
+                            logger.LogDebug("Mapped Fields {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.MappedFields, sourceMappedFields, mappableField.ArtifactId);
                             fieldRefValuePairs.Add(new FieldRefValuePair()
                             {
                                 Field = new FieldRef
@@ -150,7 +160,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     }
                     else if (mappableField.MappedFields.Length > 0)
                     {
-                        logger.LogError("sourceMappedFields: '{sourceMappedFields}' != > 0 and mappableField.MappedFields {mappableField.MappedFields} is > 0", sourceMappedFields, mappableField.MappedFields);
+                        logger.LogDebug("Mapped Fields {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.MappedFields, sourceMappedFields, mappableField.ArtifactId);
                         fieldRefValuePairs.Add(new FieldRefValuePair()
                         {
                             Field = new FieldRef
@@ -163,7 +173,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                     if (mappableField.MinimumLength != mappableSourceField.Length)
                     {
-                        logger.LogError("Minimum Lengths {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.MinimumLength, mappableSourceField.Length, mappableField.ArtifactId);
+                        logger.LogDebug("Minimum Lengths {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.MinimumLength, mappableSourceField.Length, mappableField.ArtifactId);
                         fieldRefValuePairs.Add(new FieldRefValuePair()
                         {
                             Field = new FieldRef
@@ -176,7 +186,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                     if (mappableField.SourceName != mappableSourceField.SourceName)
                     {
-                        logger.LogError("Source names {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.SourceName, mappableSourceField.SourceName, mappableField.ArtifactId);
+                        logger.LogDebug("Source names {0} and {1} are not equal for Processing Field: {artifactId}", mappableField.SourceName, mappableSourceField.SourceName, mappableField.ArtifactId);
                         fieldRefValuePairs.Add(new FieldRefValuePair()
                         {
                             Field = new FieldRef
@@ -198,6 +208,15 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             {
                 logger.LogError(e, "Error occurred while updating the Processing Field Object");
             }
+        }
+
+        public string NormalizeFieldValues(string input)
+        {
+            if (input == @"")
+            {
+                return null;
+            }
+            return input;
         }
     }
 }
