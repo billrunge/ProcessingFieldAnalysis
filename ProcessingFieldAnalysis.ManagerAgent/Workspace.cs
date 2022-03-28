@@ -79,5 +79,30 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             return 0;
         }
 
+        public string GetTextIdentifierByGuid(IHelper helper, int workspaceArtifactId, Guid guid, IAPILog logger)
+        {
+            string sql = $@"
+                    SELECT [TextIdentifier]
+                    FROM   [Artifact] A
+                           JOIN [ArtifactGuid] AG
+                             ON A.[ArtifactID] = AG.[ArtifactID]
+                    WHERE  AG.[ArtifactGuid] = @Guid";
+
+            SqlParameter[] sqlParams = new SqlParameter[]
+            {
+                new SqlParameter("@Guid", SqlDbType.UniqueIdentifier) {Value = guid}
+            };
+            try
+            {
+                IDBContext dbContext = helper.GetDBContext(workspaceArtifactId);
+                return (string)dbContext.ExecuteSqlStatementAsScalar(sql, sqlParams);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to get Artifact ID for Guid: {guid} in Workspace: {workspaceArtifactId}", guid, workspaceArtifactId);
+            }
+            return string.Empty;
+        }
+
     }
 }
