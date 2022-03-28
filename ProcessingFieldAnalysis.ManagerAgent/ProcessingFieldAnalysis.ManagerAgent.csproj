@@ -75,6 +75,7 @@
     <Compile Include="Choice.cs" />
     <Compile Include="Field.cs" />
     <Compile Include="Hash.cs" />
+    <Compile Include="MappableField.cs" />
     <Compile Include="ProcessingField.cs" />
     <Compile Include="Workspace.cs" />
     <Compile Include="GlobalVariable.cs" />
