@@ -11,8 +11,16 @@ using System.Threading.Tasks;
 
 namespace ProcessingFieldAnalysis.ManagerAgent
 {
-    class Choice
+    class ProcessingFieldObjectChoice
     {
+        public IHelper Helper { get; set; }
+        public IAPILog Logger { get; set; }
+
+        public ProcessingFieldObjectChoice(IHelper helper, IAPILog logger)
+        {
+            Helper = helper;
+            Logger = logger;
+        }
         /// <summary>
         /// Creates a Choice for a given Field (identified by Guid)
         /// </summary>
@@ -22,11 +30,11 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="fieldGuid"></param>
         /// <param name="logger"></param>
         /// <returns>int</returns>
-        public async Task<int> CreateChoiceAsync(IHelper helper, int workspaceArtifactId, string choiceName, Guid fieldGuid, IAPILog logger)
+        public async Task<int> CreateChoiceAsync(int workspaceArtifactId, string choiceName, Guid fieldGuid)
         {
             try
             {
-                using (IChoiceManager choiceManager = helper.GetServicesManager().CreateProxy<IChoiceManager>(ExecutionIdentity.CurrentUser))
+                using (IChoiceManager choiceManager = Helper.GetServicesManager().CreateProxy<IChoiceManager>(ExecutionIdentity.CurrentUser))
                 {
                     ChoiceRequest choiceRequest = new ChoiceRequest()
                     {
@@ -38,11 +46,10 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Failed to create Choice: {choiceName} on Field: {fieldGuid} in Workspace: {workspaceArtifactId}", choiceName, fieldGuid, workspaceArtifactId);
+                Logger.LogError(e, "Failed to create Choice: {choiceName} on Field: {fieldGuid} in Workspace: {workspaceArtifactId}", choiceName, fieldGuid, workspaceArtifactId);
             }
             return 0;
         }
-
         /// <summary>
         /// Takes a Field Guid and a Choice name, checks if there is a Choice that
         /// already exists with that name for that Field, and if so returns its ChoiceRef
@@ -55,11 +62,11 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="choiceName"></param>
         /// <param name="logger"></param>
         /// <returns>ChoiceRef</returns>
-        public async Task<ChoiceRef> GetSingleChoiceChoiceRefByNameAsync(IHelper helper, int workspaceArtifactId, Guid singleChoiceFieldGuid, string choiceName, IAPILog logger)
+        public async Task<ChoiceRef> GetSingleChoiceChoiceRefByNameAsync(int workspaceArtifactId, Guid singleChoiceFieldGuid, string choiceName)
         {
             try
             {
-                Dictionary<string, int> existingChoices = GetChoicesByField(helper, workspaceArtifactId, singleChoiceFieldGuid, logger);
+                Dictionary<string, int> existingChoices = GetChoicesByField(workspaceArtifactId, singleChoiceFieldGuid);
                 int choiceArtifactId;
 
                 if (existingChoices.ContainsKey(choiceName))
@@ -68,13 +75,13 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 }
                 else
                 {
-                    choiceArtifactId = await CreateChoiceAsync(helper, workspaceArtifactId, choiceName, singleChoiceFieldGuid, logger);
+                    choiceArtifactId = await CreateChoiceAsync(workspaceArtifactId, choiceName, singleChoiceFieldGuid);
                 }
                 return new ChoiceRef { ArtifactID = choiceArtifactId };
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Failed to get Single ChoiceRef for Choice: {choiceName}: on Field: {singleChoiceFieldGuid} in Workspace: {workspaceArtifactId}", choiceName, singleChoiceFieldGuid, workspaceArtifactId);
+                Logger.LogError(e, "Failed to get Single ChoiceRef for Choice: {choiceName}: on Field: {singleChoiceFieldGuid} in Workspace: {workspaceArtifactId}", choiceName, singleChoiceFieldGuid, workspaceArtifactId);
             }
             return new ChoiceRef();
         }
@@ -90,11 +97,11 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="choiceNames"></param>
         /// <param name="logger"></param>
         /// <returns>List<ChoiceRef></returns>
-        public async Task<List<ChoiceRef>> GetMultipleChoiceRefsByNameAsync(IHelper helper, int workspaceArtifactId, Guid multipleChoiceFieldGuid, string[] choiceNames, IAPILog logger)
+        public async Task<List<ChoiceRef>> GetMultipleChoiceRefsByNameAsync(int workspaceArtifactId, Guid multipleChoiceFieldGuid, string[] choiceNames)
         {
             try
             {
-                Dictionary<string, int> existingChoices = GetChoicesByField(helper, workspaceArtifactId, multipleChoiceFieldGuid, logger);
+                Dictionary<string, int> existingChoices = GetChoicesByField(workspaceArtifactId, multipleChoiceFieldGuid);
                 List<ChoiceRef> choiceRefs = new List<ChoiceRef>();
 
                 if (choiceNames != null)
@@ -108,7 +115,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         }
                         else
                         {
-                            mappedFieldArtifactId = await CreateChoiceAsync(helper, workspaceArtifactId, choice, multipleChoiceFieldGuid, logger);
+                            mappedFieldArtifactId = await CreateChoiceAsync(workspaceArtifactId, choice, multipleChoiceFieldGuid);
                         }
 
                         choiceRefs.Add(new ChoiceRef { ArtifactID = mappedFieldArtifactId });
@@ -118,11 +125,10 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Failed to get Multiple ChoiceRefs for Choices: {choiceNames}: on Field: {multipleChoiceFieldGuid} in Workspace: {workspaceArtifactId}", choiceNames, multipleChoiceFieldGuid, workspaceArtifactId);
+                Logger.LogError(e, "Failed to get Multiple ChoiceRefs for Choices: {choiceNames}: on Field: {multipleChoiceFieldGuid} in Workspace: {workspaceArtifactId}", choiceNames, multipleChoiceFieldGuid, workspaceArtifactId);
             }
             return new List<ChoiceRef>();
         }
-
         /// <summary>
         /// Gets a list of Choice names associated with a specific Field (identified by Guid)
         /// Currently uses SQL, but would like to replace with API
@@ -132,7 +138,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="fieldGuid"></param>
         /// <param name="logger"></param>
         /// <returns>Dictionary<string, int></returns>
-        public Dictionary<string, int> GetChoicesByField(IHelper helper, int workspaceArtifactId, Guid fieldGuid, IAPILog logger)
+        public Dictionary<string, int> GetChoicesByField(int workspaceArtifactId, Guid fieldGuid)
         {
             try
             {
@@ -151,7 +157,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 new SqlParameter("@FieldGuid", SqlDbType.UniqueIdentifier) {Value = fieldGuid}
             };
 
-                IDBContext dbContext = helper.GetDBContext(workspaceArtifactId);
+                IDBContext dbContext = Helper.GetDBContext(workspaceArtifactId);
                 DataTable resultDataTable = dbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
                 Dictionary<string, int> choices = new Dictionary<string, int>();
 
@@ -163,7 +169,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Failed to get Choices for Field: {fieldGuid} in Workspace: {workspaceArtifactId}", fieldGuid, workspaceArtifactId);
+                Logger.LogError(e, "Failed to get Choices for Field: {fieldGuid} in Workspace: {workspaceArtifactId}", fieldGuid, workspaceArtifactId);
             }
             return new Dictionary<string, int>();
         }

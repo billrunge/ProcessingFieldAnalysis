@@ -7,6 +7,14 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class InvariantField
     {
+        public IHelper Helper { get; set; }
+        public IAPILog Logger { get; set; }
+
+        public InvariantField(IHelper helper, IAPILog logger)
+        {
+            Helper = helper;
+            Logger = logger;
+        }
         /// <summary>
         /// Gets an array of IFieldMapper.MappableSourceFields 
         /// </summary>
@@ -14,10 +22,10 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="workspaceArtifactId"></param>
         /// <param name="logger"></param>
         /// <returns>MappableSourceField[]</returns>
-        public async Task<MappableSourceField[]> GetInvariantFieldsAsync(IHelper helper, int workspaceArtifactId, IAPILog logger)
+        public async Task<MappableSourceField[]> GetInvariantFieldsAsync(int workspaceArtifactId)
         {
             MappableSourceField[] result = null;
-            using (IFieldMapping proxy = helper.GetServicesManager().CreateProxy<IFieldMapping>(ExecutionIdentity.CurrentUser))
+            using (IFieldMapping proxy = Helper.GetServicesManager().CreateProxy<IFieldMapping>(ExecutionIdentity.CurrentUser))
             {
                 try
                 {
@@ -25,7 +33,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 }
                 catch (Exception exception)
                 {
-                    logger.LogError(exception, "FieldMapping Service GetInvariantFieldsAsync call failed for Workspace ID {0}", workspaceArtifactId);
+                    Logger.LogError(exception, "FieldMapping Service GetInvariantFieldsAsync call failed for Workspace ID {0}", workspaceArtifactId);
                 }
             }
             return result;

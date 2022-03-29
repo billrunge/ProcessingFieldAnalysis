@@ -16,24 +16,23 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// </summary>
         public override async void Execute()
         {
-            IAPILog logger = Helper.GetLoggerFactory().GetLogger();
+            IAPILog Logger = Helper.GetLoggerFactory().GetLogger();
             try
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ProcessingFieldObject processingFieldObject = new ProcessingFieldObject();
-                Workspace workspace = new Workspace();
-                InvariantField invariantField = new InvariantField();
-                ProcessingField processingField = new ProcessingField();
-                OtherMetadata otherMetadata = new OtherMetadata(Helper, logger);
+                Workspace workspace = new Workspace(Helper, Logger);
+                InvariantField invariantField = new InvariantField(Helper, Logger);
+                ProcessingField processingField = new ProcessingField(Helper, Logger);
+                OtherMetadata otherMetadata = new OtherMetadata(Helper, Logger);
 
-                List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled(Helper.GetDBContext(-1), logger);
+                List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled();
 
                 foreach (int workspaceArtifactId in installedWorkspaceArtifactIds)
                 {
-                    MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(Helper, workspaceArtifactId, logger);
-                    List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(Helper, workspaceArtifactId, logger);
-                    await processingFieldObject.PopulateProcessingFieldObjectAsync(Helper, workspaceArtifactId, mappableSourceFields, existingProcessingFields, logger);
-                    await processingFieldObject.UpdateProcessingFieldObjectAsync(Helper, workspaceArtifactId, mappableSourceFields, existingProcessingFields, logger);
+                    MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(workspaceArtifactId);
+                    List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
+                    await processingField.PopulateProcessingFieldObjectAsync(workspaceArtifactId, mappableSourceFields, existingProcessingFields);
+                    await processingField.UpdateProcessingFieldObjectsAsync(workspaceArtifactId, mappableSourceFields, existingProcessingFields);
                     await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
                 }
 
@@ -41,7 +40,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             catch (Exception e)
             {
-                logger.LogError(e, "The Processing Field Analysis Manager Agent encountered an issue");
+                Logger.LogError(e, "The Processing Field Analysis Manager Agent encountered an issue");
                 RaiseError("The Processing Field Analysis Manager Agent encountered an issue", e.ToString());
             }
             return;

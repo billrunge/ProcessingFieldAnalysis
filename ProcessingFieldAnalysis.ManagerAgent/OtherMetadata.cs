@@ -86,8 +86,8 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             {
                 try
                 {
-                    Workspace workspace = new Workspace();
-                    string otherMetadataFieldName = workspace.GetTextIdentifierByGuid(Helper, workspaceArtifactId, GlobalVariable.DOCUMENT_OBJECT_OTHER_METADATA_FIELD, Logger);
+                    Workspace workspace = new Workspace(Helper, Logger);
+                    string otherMetadataFieldName = workspace.GetTextIdentifierByGuid(workspaceArtifactId, GlobalVariable.DOCUMENT_OBJECT_OTHER_METADATA_FIELD);
 
                     var queryRequest = new QueryRequest()
                     {
@@ -129,6 +129,13 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 return new List<OtherMetadataResultObject>();
             }
         }
+        /// <summary>
+        /// This method actually make the call to Object Manager to link Documents to the Processing Field Object via a multi-object field
+        /// </summary>
+        /// <param name="workspaceArtifactId"></param>
+        /// <param name="documentArtifactId"></param>
+        /// <param name="linkedProcessingFields"></param>
+        /// <returns></returns>
         async Task<UpdateResult> UpdateOtherMetadataFieldAsync(int workspaceArtifactId, int documentArtifactId, List<int> linkedProcessingFields)
         {
             using (IObjectManager objectManager = Helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))

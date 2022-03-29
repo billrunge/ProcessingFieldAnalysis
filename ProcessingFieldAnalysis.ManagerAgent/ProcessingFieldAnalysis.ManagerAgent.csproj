@@ -72,7 +72,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Choice.cs" />
+    <Compile Include="ProcessingFieldObjectChoice.cs" />
     <Compile Include="Field.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="MappableField.cs" />
@@ -82,7 +82,6 @@
     <Compile Include="GlobalVariable.cs" />
     <Compile Include="InvariantField.cs" />
     <Compile Include="Agent.cs" />
-    <Compile Include="ProcessingFieldObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

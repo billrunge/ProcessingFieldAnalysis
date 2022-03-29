@@ -7,12 +7,18 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class Hash
     {  
+        IAPILog Logger { get; set; }
+
+        public Hash (IAPILog logger)
+        {
+            Logger = logger;
+        }
         /// <summary>
         /// Generates a 128 character SHA512 hash for a given input string
         /// </summary>
         /// <param name="input"></param>
         /// <returns>string</returns>
-        public string GetHash(string input, IAPILog logger)
+        public string GetHash(string input)
         {
             using (SHA512 sha512Hash = SHA512.Create())
             {
@@ -28,7 +34,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     return builder.ToString();
                 } catch (Exception e)
                 {
-                    logger.LogError("Failed to generate SHA512 hash for input string: {input}", input);
+                    Logger.LogError(e, "Failed to generate SHA512 hash for input string: {input}", input);
                 }
             }
             return "";

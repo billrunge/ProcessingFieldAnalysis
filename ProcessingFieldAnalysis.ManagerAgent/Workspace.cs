@@ -8,16 +8,26 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class Workspace
     {
+        public IHelper Helper { get; set; }
+        public IAPILog Logger { get; set; }
+
+        public Workspace (IHelper helper, IAPILog logger)
+        {
+            Helper = helper;
+            Logger = logger;
+        }
         /// <summary>
         /// Retrieves a list of Workspace Artifact IDs where the Processing Field Application is installed.
         /// Currently uses DB context, would like to replace with API.
         /// </summary>
         /// <param name="eddsDbContext"></param>
         /// <returns></returns>
-        public List<int> GetWorkspaceArtifactIdsWhereApplicationIsInstalled(IDBContext eddsDbContext, IAPILog logger)
+        public List<int> GetWorkspaceArtifactIdsWhereApplicationIsInstalled()
         {
             try
             {
+                IDBContext eddsDbContext = Helper.GetDBContext(-1);
+
                 string sql = $@"
                     SELECT [CaseID]
                     FROM   [EDDS].[eddsdbo].[CaseApplication] C
@@ -44,7 +54,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 return installedWorkspaceArtifactIds;
             } catch (Exception e)
             {
-                logger.LogError(e, "Error occurred getting list of Workspace Artifact IDs where the Processing Field Application is installed.");
+                Logger.LogError(e, "Error occurred getting list of Workspace Artifact IDs where the Processing Field Application is installed.");
             }
             return new List<int>();
         }
@@ -56,7 +66,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="workspaceArtifactId"></param>
         /// <param name="guid"></param>
         /// <returns></returns>
-        public int GetArtifactIdByGuid(IHelper helper, int workspaceArtifactId, Guid guid, IAPILog logger)
+        public int GetArtifactIdByGuid(int workspaceArtifactId, Guid guid)
         {
             string sql = $@"
                     SELECT TOP 1 [ArtifactID]
@@ -69,17 +79,22 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             };
             try
             {
-                IDBContext dbContext = helper.GetDBContext(workspaceArtifactId);
+                IDBContext dbContext = Helper.GetDBContext(workspaceArtifactId);
                 return (int)dbContext.ExecuteSqlStatementAsScalar(sql, sqlParams);
             } 
             catch(Exception e)
             {
-                logger.LogError(e, "Failed to get Artifact ID for Guid: {guid} in Workspace: {workspaceArtifactId}", guid, workspaceArtifactId);
+                Logger.LogError(e, "Failed to get Artifact ID for Guid: {guid} in Workspace: {workspaceArtifactId}", guid, workspaceArtifactId);
             }
             return 0;
         }
-
-        public string GetTextIdentifierByGuid(IHelper helper, int workspaceArtifactId, Guid guid, IAPILog logger)
+        /// <summary>
+        /// Retrieves an Object's Artifact Text Identifier by Guid
+        /// </summary>
+        /// <param name="workspaceArtifactId"></param>
+        /// <param name="guid"></param>
+        /// <returns></returns>
+        public string GetTextIdentifierByGuid(int workspaceArtifactId, Guid guid)
         {
             string sql = $@"
                     SELECT [TextIdentifier]
@@ -94,15 +109,14 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             };
             try
             {
-                IDBContext dbContext = helper.GetDBContext(workspaceArtifactId);
+                IDBContext dbContext = Helper.GetDBContext(workspaceArtifactId);
                 return (string)dbContext.ExecuteSqlStatementAsScalar(sql, sqlParams);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Failed to get Artifact ID for Guid: {guid} in Workspace: {workspaceArtifactId}", guid, workspaceArtifactId);
+                Logger.LogError(e, "Failed to get Artifact ID for Guid: {guid} in Workspace: {workspaceArtifactId}", guid, workspaceArtifactId);
             }
             return string.Empty;
         }
-
     }
 }
