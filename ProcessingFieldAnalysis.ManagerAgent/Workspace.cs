@@ -11,7 +11,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         public IHelper Helper { get; set; }
         public IAPILog Logger { get; set; }
 
-        public Workspace (IHelper helper, IAPILog logger)
+        public Workspace(IHelper helper, IAPILog logger)
         {
             Helper = helper;
             Logger = logger;
@@ -39,9 +39,9 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                            AND [CaseID] <> -1";
 
                 var sqlParams = new List<SqlParameter>
-            {
-                new SqlParameter("@applicationGuid", SqlDbType.UniqueIdentifier) {Value = GlobalVariable.PROCESSING_FIELD_APPLICATION_GUID}
-            };
+                {
+                    new SqlParameter("@applicationGuid", SqlDbType.UniqueIdentifier) {Value = GlobalVariable.PROCESSING_FIELD_APPLICATION_GUID}
+                };
 
                 DataTable installedWorkspacesDataTable = eddsDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
                 List<int> installedWorkspaceArtifactIds = new List<int>();
@@ -52,7 +52,8 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 }
 
                 return installedWorkspaceArtifactIds;
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Logger.LogError(e, "Error occurred getting list of Workspace Artifact IDs where the Processing Field Application is installed.");
             }
@@ -81,8 +82,8 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             {
                 IDBContext dbContext = Helper.GetDBContext(workspaceArtifactId);
                 return (int)dbContext.ExecuteSqlStatementAsScalar(sql, sqlParams);
-            } 
-            catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Logger.LogError(e, "Failed to get Artifact ID for Guid: {guid} in Workspace: {workspaceArtifactId}", guid, workspaceArtifactId);
             }
