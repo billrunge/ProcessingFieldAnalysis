@@ -12,62 +12,6 @@ namespace ProcessingFieldAnalysis.ManagerAgent
     class OtherMetadata
     {
         /// <summary>
-        /// This function retrieves a list of the OtherMetadata field from Documents in a Workspace using Object Manager
-        /// </summary>
-        /// <param name="helper"></param>
-        /// <param name="workspaceArtifactId"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        public async Task<List<OtherMetadataResultObject>> GetOtherMetadataListAsync(IHelper helper, int workspaceArtifactId, int requestStart, int length, IAPILog logger)
-        {
-            using (IObjectManager objectManager = helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
-            {
-                try
-                {
-                    Workspace workspace = new Workspace();
-                    string otherMetadataFieldName = workspace.GetTextIdentifierByGuid(helper, workspaceArtifactId, GlobalVariable.DOCUMENT_OBJECT_OTHER_METADATA_FIELD, logger);
-
-                    var queryRequest = new QueryRequest()
-                    {
-                        Fields = new List<FieldRef>() {
-                            new FieldRef{ Guid = GlobalVariable.DOCUMENT_OBJECT_OTHER_METADATA_FIELD },
-                            new FieldRef{ Guid = GlobalVariable.DOCUMENT_OBJECT_UNMAPPED_METADATA_MULTI_OBJECT_FIELD }
-                        },
-                        ObjectType = new ObjectTypeRef { Guid = GlobalVariable.DOCUMENT_OBJECT },
-                        Condition = $"'{otherMetadataFieldName}' ISSET"
-                    };
-
-                    QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, requestStart, length);
-
-                    List<OtherMetadataResultObject> otherMetadataList = new List<OtherMetadataResultObject>();
-
-                    foreach (RelativityObject resultObject in queryResult.Objects)
-                    {
-                        List<RelativityObjectValue> missingMetadataFieldValues = new List<RelativityObjectValue>();
-
-                        if (resultObject[GlobalVariable.DOCUMENT_OBJECT_UNMAPPED_METADATA_MULTI_OBJECT_FIELD].Value != null)
-                        {
-                            missingMetadataFieldValues = (List<RelativityObjectValue>)resultObject[GlobalVariable.DOCUMENT_OBJECT_UNMAPPED_METADATA_MULTI_OBJECT_FIELD].Value;
-                        }
-
-                        OtherMetadataResultObject otherMetadataResultObject = new OtherMetadataResultObject()
-                        {
-                            ArtifactId = resultObject.ArtifactID,
-                            OtherMetadataFieldValue = (string)resultObject[GlobalVariable.DOCUMENT_OBJECT_OTHER_METADATA_FIELD].Value,
-                            MissingMetadataFieldValue = missingMetadataFieldValues
-                        };
-                        otherMetadataList.Add(otherMetadataResultObject);
-                    }
-                    return otherMetadataList;
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Unable to get a list of Other Metadata from Workspace: {workspaceArtifactId}", workspaceArtifactId);
-                }
-                return new List<OtherMetadataResultObject>();
-            }
-        }
-        /// <summary>
         /// This method takes a list of existingProcessingFields and then uses the UpdateOtherMetadataFieldAsync method to update the Other Metadata field for Documents
         /// Linking them to Processing Fields that represent missing/unmapped metadata
         /// </summary>
@@ -120,8 +64,63 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 logger.LogError(e, "There was an issue parsing the Other Metadata field list retrieved from Workspace: {workspaceArtifactId}", workspaceArtifactId);
             }
         }
+        /// <summary>
+        /// This function retrieves a list of the OtherMetadata field from Documents in a Workspace using Object Manager
+        /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="workspaceArtifactId"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        async Task<List<OtherMetadataResultObject>> GetOtherMetadataListAsync(IHelper helper, int workspaceArtifactId, int requestStart, int length, IAPILog logger)
+        {
+            using (IObjectManager objectManager = helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
+            {
+                try
+                {
+                    Workspace workspace = new Workspace();
+                    string otherMetadataFieldName = workspace.GetTextIdentifierByGuid(helper, workspaceArtifactId, GlobalVariable.DOCUMENT_OBJECT_OTHER_METADATA_FIELD, logger);
 
-        public async Task<UpdateResult> UpdateOtherMetadataFieldAsync(IHelper helper, int workspaceArtifactId, int documentArtifactId, List<int> linkedProcessingFields, IAPILog logger)
+                    var queryRequest = new QueryRequest()
+                    {
+                        Fields = new List<FieldRef>() {
+                            new FieldRef{ Guid = GlobalVariable.DOCUMENT_OBJECT_OTHER_METADATA_FIELD },
+                            new FieldRef{ Guid = GlobalVariable.DOCUMENT_OBJECT_UNMAPPED_METADATA_MULTI_OBJECT_FIELD }
+                        },
+                        ObjectType = new ObjectTypeRef { Guid = GlobalVariable.DOCUMENT_OBJECT },
+                        Condition = $"'{otherMetadataFieldName}' ISSET"
+                    };
+
+                    QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, requestStart, length);
+
+                    List<OtherMetadataResultObject> otherMetadataList = new List<OtherMetadataResultObject>();
+
+                    foreach (RelativityObject resultObject in queryResult.Objects)
+                    {
+                        List<RelativityObjectValue> missingMetadataFieldValues = new List<RelativityObjectValue>();
+
+                        if (resultObject[GlobalVariable.DOCUMENT_OBJECT_UNMAPPED_METADATA_MULTI_OBJECT_FIELD].Value != null)
+                        {
+                            missingMetadataFieldValues = (List<RelativityObjectValue>)resultObject[GlobalVariable.DOCUMENT_OBJECT_UNMAPPED_METADATA_MULTI_OBJECT_FIELD].Value;
+                        }
+
+                        OtherMetadataResultObject otherMetadataResultObject = new OtherMetadataResultObject()
+                        {
+                            ArtifactId = resultObject.ArtifactID,
+                            OtherMetadataFieldValue = (string)resultObject[GlobalVariable.DOCUMENT_OBJECT_OTHER_METADATA_FIELD].Value,
+                            MissingMetadataFieldValue = missingMetadataFieldValues
+                        };
+                        otherMetadataList.Add(otherMetadataResultObject);
+                    }
+                    return otherMetadataList;
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Unable to get a list of Other Metadata from Workspace: {workspaceArtifactId}", workspaceArtifactId);
+                }
+                return new List<OtherMetadataResultObject>();
+            }
+        }
+        async Task<UpdateResult> UpdateOtherMetadataFieldAsync(IHelper helper, int workspaceArtifactId, int documentArtifactId, List<int> linkedProcessingFields, IAPILog logger)
         {
             using (IObjectManager objectManager = helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
             {
