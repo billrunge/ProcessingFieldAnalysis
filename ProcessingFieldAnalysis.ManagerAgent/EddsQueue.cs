@@ -101,6 +101,75 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
         }
 
+        public List<int> GetListOfWorkspaceArtifactIdsToManageProcessingFields()
+        {
+            try
+            {
+                IDBContext eddsDbContext = Helper.GetDBContext(-1);
 
+                string sql = @"
+                        SELECT [WorkspaceArtifactID]
+                        FROM   [ProcessingFieldManagerQueue]
+                        WHERE  [ProcessingFieldOBjectMaintEnabled] = 1
+                               AND ( [ProcessingFieldObjectMaintLastRun] IS NULL
+                                      OR Datediff(hour, [ProcessingFieldObjectMaintLastRun],
+                                         Getutcdate()) >
+                                         @HourlyInterval )";
+
+                var sqlParams = new List<SqlParameter>
+                {
+                    new SqlParameter("@HourlyInterval", SqlDbType.Int) {Value = GlobalVariable.PROCESSING_FIELD_MAINTENANCE_HOURLY_INTERVAL}
+                };
+
+                DataTable results = eddsDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
+                List<int> workspaceArtifactIdList = new List<int>();
+
+                foreach(DataRow row in results.Rows)
+                {
+                    workspaceArtifactIdList.Add((int)row["[WorkspaceArtifactID]"]);
+                }
+                return workspaceArtifactIdList;
+            }
+            catch(Exception e)
+            {
+                Logger.LogError(e, "Error occurred while getting a list of Workspace Artifact IDs to perform Processing Field Magagent");
+            }
+            return new List<int>();
+        }
+
+        public List<int> GetListOfWorkspaceArtifactIdsToAnalyzeOtherMetadta()
+        {
+            try
+            {
+                IDBContext eddsDbContext = Helper.GetDBContext(-1);
+
+                string sql = @"
+                        SELECT [WorkspaceArtifactID]
+                        FROM   [ProcessingFieldManagerQueue]
+                        WHERE  [OtherMetadataAnalysisEnabled] = 1
+                               AND ( [OtherMetadataAnalysisLastRun] IS NULL
+                                      OR Datediff(hour, [OtherMetadataAnalysisLastRun], Getutcdate()) >
+                                         @HourlyInterval ) ";
+
+                var sqlParams = new List<SqlParameter>
+                {
+                    new SqlParameter("@HourlyInterval", SqlDbType.Int) {Value = GlobalVariable.OTHER_METADATA_ANALYSIS_HOURLY_INTERVAL}
+                };
+
+                DataTable results = eddsDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
+                List<int> workspaceArtifactIdList = new List<int>();
+
+                foreach (DataRow row in results.Rows)
+                {
+                    workspaceArtifactIdList.Add((int)row["[WorkspaceArtifactID]"]);
+                }
+                return workspaceArtifactIdList;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error occurred while getting a list of Workspace Artifact IDs to perform Other Metadata analysis");
+            }
+            return new List<int>();
+        }
     }
 }
