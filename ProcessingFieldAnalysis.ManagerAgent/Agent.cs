@@ -24,7 +24,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 Workspace workspace = new Workspace();
                 InvariantField invariantField = new InvariantField();
                 ProcessingField processingField = new ProcessingField();
-                OtherMetadata otherMetadata = new OtherMetadata();
+                OtherMetadata otherMetadata = new OtherMetadata(Helper, logger);
 
                 List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled(Helper.GetDBContext(-1), logger);
 
@@ -34,7 +34,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(Helper, workspaceArtifactId, logger);
                     await processingFieldObject.PopulateProcessingFieldObjectAsync(Helper, workspaceArtifactId, mappableSourceFields, existingProcessingFields, logger);
                     await processingFieldObject.UpdateProcessingFieldObjectAsync(Helper, workspaceArtifactId, mappableSourceFields, existingProcessingFields, logger);
-                    await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(Helper, workspaceArtifactId, existingProcessingFields, logger, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
+                    await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
                 }
 
                 RaiseMessage("Completed.", 1);

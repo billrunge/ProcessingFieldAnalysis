@@ -11,6 +11,15 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 {
     class OtherMetadata
     {
+        public IAPILog Logger { get; set; }
+        public IHelper Helper { get; set; }
+
+        public OtherMetadata (IHelper helper, IAPILog logger)
+        {
+            Helper = helper;
+            Logger = logger;
+        }
+
         /// <summary>
         /// This method takes a list of existingProcessingFields and then uses the UpdateOtherMetadataFieldAsync method to update the Other Metadata field for Documents
         /// Linking them to Processing Fields that represent missing/unmapped metadata
@@ -20,14 +29,14 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="existingProcessingFields"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public async Task ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(IHelper helper, int workspaceArtifactId, List<MappableField> existingProcessingFields, IAPILog logger, int batchSize, int requestStart = 1)
+        public async Task ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(int workspaceArtifactId, List<MappableField> existingProcessingFields, int batchSize, int requestStart = 1)
         {
             try
             {
-                List<OtherMetadataResultObject> workspaceOtherMetadataFieldList = await GetOtherMetadataListAsync(helper, workspaceArtifactId, requestStart, batchSize, logger);
+                List<OtherMetadataResultObject> workspaceOtherMetadataFieldList = await GetOtherMetadataListAsync(workspaceArtifactId, requestStart, batchSize);
                 if (workspaceOtherMetadataFieldList.Count == batchSize)
                 {
-                    await ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(helper, workspaceArtifactId, existingProcessingFields, logger, batchSize, requestStart + batchSize);
+                    await ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, batchSize, requestStart + batchSize);
                 }
 
                 foreach (OtherMetadataResultObject otherMetadataResult in workspaceOtherMetadataFieldList)
@@ -55,13 +64,13 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                     if (linkedProcessingFields.Count > 0 && !areEqual)
                     {
-                        await UpdateOtherMetadataFieldAsync(helper, workspaceArtifactId, otherMetadataResult.ArtifactId, linkedProcessingFields, logger);
+                        await UpdateOtherMetadataFieldAsync(workspaceArtifactId, otherMetadataResult.ArtifactId, linkedProcessingFields);
                     }
                 }
             }
             catch (Exception e)
             {
-                logger.LogError(e, "There was an issue parsing the Other Metadata field list retrieved from Workspace: {workspaceArtifactId}", workspaceArtifactId);
+                Logger.LogError(e, "There was an issue parsing the Other Metadata field list retrieved from Workspace: {workspaceArtifactId}", workspaceArtifactId);
             }
         }
         /// <summary>
@@ -71,14 +80,14 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="workspaceArtifactId"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        async Task<List<OtherMetadataResultObject>> GetOtherMetadataListAsync(IHelper helper, int workspaceArtifactId, int requestStart, int length, IAPILog logger)
+        async Task<List<OtherMetadataResultObject>> GetOtherMetadataListAsync(int workspaceArtifactId, int requestStart, int length)
         {
-            using (IObjectManager objectManager = helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
+            using (IObjectManager objectManager = Helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
             {
                 try
                 {
                     Workspace workspace = new Workspace();
-                    string otherMetadataFieldName = workspace.GetTextIdentifierByGuid(helper, workspaceArtifactId, GlobalVariable.DOCUMENT_OBJECT_OTHER_METADATA_FIELD, logger);
+                    string otherMetadataFieldName = workspace.GetTextIdentifierByGuid(Helper, workspaceArtifactId, GlobalVariable.DOCUMENT_OBJECT_OTHER_METADATA_FIELD, Logger);
 
                     var queryRequest = new QueryRequest()
                     {
@@ -115,14 +124,14 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 }
                 catch (Exception e)
                 {
-                    logger.LogError(e, "Unable to get a list of Other Metadata from Workspace: {workspaceArtifactId}", workspaceArtifactId);
+                    Logger.LogError(e, "Unable to get a list of Other Metadata from Workspace: {workspaceArtifactId}", workspaceArtifactId);
                 }
                 return new List<OtherMetadataResultObject>();
             }
         }
-        async Task<UpdateResult> UpdateOtherMetadataFieldAsync(IHelper helper, int workspaceArtifactId, int documentArtifactId, List<int> linkedProcessingFields, IAPILog logger)
+        async Task<UpdateResult> UpdateOtherMetadataFieldAsync(int workspaceArtifactId, int documentArtifactId, List<int> linkedProcessingFields)
         {
-            using (IObjectManager objectManager = helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
+            using (IObjectManager objectManager = Helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
             {
                 try
                 {
@@ -148,7 +157,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 }
                 catch (Exception exception)
                 {
-                    logger.LogError(exception, "There was an error updating the Other Metadata field for Document {documentArtifactId} in Workspace: {workspaceArtifactId} with values: {linkedProcessingFields}", documentArtifactId, workspaceArtifactId, linkedProcessingFields);
+                    Logger.LogError(exception, "There was an error updating the Other Metadata field for Document {documentArtifactId} in Workspace: {workspaceArtifactId} with values: {linkedProcessingFields}", documentArtifactId, workspaceArtifactId, linkedProcessingFields);
                 }
             }
             return new UpdateResult();
