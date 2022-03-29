@@ -28,5 +28,8 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         //Document Object Fields
         public static readonly Guid DOCUMENT_OBJECT_OTHER_METADATA_FIELD = new Guid("DCE19DA4-D470-4EFC-A932-AFF489911A37");
         public static readonly Guid DOCUMENT_OBJECT_UNMAPPED_METADATA_MULTI_OBJECT_FIELD = new Guid("867DBF19-A278-473C-8839-E04D382F3748");
+
+        //Other
+        public static readonly int OTHER_METADATA_FIELD_PARSING_BATCH_SIZE = 1000;
     }
 }

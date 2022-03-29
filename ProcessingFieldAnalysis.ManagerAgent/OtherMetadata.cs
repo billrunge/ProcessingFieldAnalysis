@@ -18,7 +18,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="workspaceArtifactId"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public async Task<List<OtherMetadataResultObject>> GetOtherMetadataListAsync(IHelper helper, int workspaceArtifactId, IAPILog logger)
+        public async Task<List<OtherMetadataResultObject>> GetOtherMetadataListAsync(IHelper helper, int workspaceArtifactId, int requestStart, int length, IAPILog logger)
         {
             using (IObjectManager objectManager = helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
             {
@@ -37,7 +37,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         Condition = $"'{otherMetadataFieldName}' ISSET"
                     };
 
-                    QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, 1, Int32.MaxValue);
+                    QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, requestStart, length);
 
                     List<OtherMetadataResultObject> otherMetadataList = new List<OtherMetadataResultObject>();
 
@@ -76,11 +76,15 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="existingProcessingFields"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public async Task ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(IHelper helper, int workspaceArtifactId, List<MappableField> existingProcessingFields, IAPILog logger)
+        public async Task ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(IHelper helper, int workspaceArtifactId, List<MappableField> existingProcessingFields, IAPILog logger, int batchSize, int requestStart = 1)
         {
             try
             {
-                List<OtherMetadataResultObject> workspaceOtherMetadataFieldList = await GetOtherMetadataListAsync(helper, workspaceArtifactId, logger);
+                List<OtherMetadataResultObject> workspaceOtherMetadataFieldList = await GetOtherMetadataListAsync(helper, workspaceArtifactId, requestStart, batchSize, logger);
+                if (workspaceOtherMetadataFieldList.Count == batchSize)
+                {
+                    await ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(helper, workspaceArtifactId, existingProcessingFields, logger, batchSize, requestStart + batchSize);
+                }
 
                 foreach (OtherMetadataResultObject otherMetadataResult in workspaceOtherMetadataFieldList)
                 {
