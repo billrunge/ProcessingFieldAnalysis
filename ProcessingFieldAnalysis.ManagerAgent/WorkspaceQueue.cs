@@ -43,7 +43,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             catch (Exception e)
             {
-                Logger.LogError(e, "Error occurred while populating the [ProcessingFieldManagerQueue] table in the EDDS database");
+                Logger.LogError(e, "Error occurred while creating the [ProcessingFieldOtherMetadataQueue] table in the EDDS{workspaceArtifactID} database", workspaceArtifactId);
             }
         }
 
