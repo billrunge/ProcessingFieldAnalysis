@@ -84,6 +84,7 @@
     <Compile Include="InvariantField.cs" />
     <Compile Include="Agent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WorkspaceQueue.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

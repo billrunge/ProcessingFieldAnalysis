@@ -34,11 +34,15 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                               CREATE TABLE [eddsdbo].[ProcessingFieldManagerQueue]
                                 (
-                                   [WorkspaceArtifactID]               [int] NOT NULL,
-                                   [ProcessingFieldObjectMaintLastRun] [datetime] NULL,
-                                   [ProcessingFieldObjectMaintEnabled] [bit] NOT NULL,
-                                   [OtherMetadataAnalysisLastRun]      [datetime] NULL,
-                                   [OtherMetadataAnalysisEnabled]      [bit] NOT NULL
+                                   [WorkspaceArtifactID]                    [int] NOT NULL,
+                                   [ProcessingFieldObjectMaintLastRun]      [datetime] NULL,
+                                   [ProcessingFieldObjectMaintEnabled]      [bit] NOT NULL,
+                                   [ProcessingFieldObjectMaintInProgress]   [bit] NOT NULL,
+                                   [ProcessingFieldObjectMaintStartTime]    [datetime] NULL,
+                                   [OtherMetadataAnalysisLastRun]           [datetime] NULL,
+                                   [OtherMetadataAnalysisEnabled]           [bit] NOT NULL,
+                                   [OtherMetadataAnalysisInProgress]        [bit] NOT NULL,
+                                   [OtherMetadataAnalysisStartTime]         [datetime] NULL
                                 )
                               ON [PRIMARY]
 
@@ -76,8 +80,12 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         SELECT [CaseID],
                                NULL,
                                0,
+                               0,
                                NULL,
-                               0
+                               NULL,
+                               0,
+                               0,
+                               NULL
                         FROM   [CaseApplication] C
                                JOIN [ApplicationInstall] A
                                  ON C.[CurrentApplicationInstallID] = A.[ApplicationInstallID]
@@ -111,6 +119,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         SELECT [WorkspaceArtifactID]
                         FROM   [ProcessingFieldManagerQueue]
                         WHERE  [ProcessingFieldOBjectMaintEnabled] = 1
+                        AND    [ProcessingFieldObjectMaintInProgress] = 0
                                AND ( [ProcessingFieldObjectMaintLastRun] IS NULL
                                       OR Datediff(hour, [ProcessingFieldObjectMaintLastRun],
                                          Getutcdate()) >
@@ -126,7 +135,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                 foreach(DataRow row in results.Rows)
                 {
-                    workspaceArtifactIdList.Add((int)row["[WorkspaceArtifactID]"]);
+                    workspaceArtifactIdList.Add((int)row["WorkspaceArtifactID"]);
                 }
                 return workspaceArtifactIdList;
             }
@@ -147,6 +156,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         SELECT [WorkspaceArtifactID]
                         FROM   [ProcessingFieldManagerQueue]
                         WHERE  [OtherMetadataAnalysisEnabled] = 1
+                        AND    [OtherMetadataAnalysisInProgress] = 0
                                AND ( [OtherMetadataAnalysisLastRun] IS NULL
                                       OR Datediff(hour, [OtherMetadataAnalysisLastRun], Getutcdate()) >
                                          @HourlyInterval ) ";
@@ -161,7 +171,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                 foreach (DataRow row in results.Rows)
                 {
-                    workspaceArtifactIdList.Add((int)row["[WorkspaceArtifactID]"]);
+                    workspaceArtifactIdList.Add((int)row["WorkspaceArtifactID"]);
                 }
                 return workspaceArtifactIdList;
             }
@@ -170,6 +180,62 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 Logger.LogError(e, "Error occurred while getting a list of Workspace Artifact IDs to perform Other Metadata analysis");
             }
             return new List<int>();
+        }
+
+        public bool SetProcessingFieldObjectMaintInProgressToTrue(int workspaceArtifactId)
+        {
+            try
+            {
+                IDBContext eddsDbContext = Helper.GetDBContext(-1);
+
+                string sql = @"
+                        UPDATE [EDDS].[eddsdbo].[ProcessingFieldManagerQueue]
+                        SET    [ProcessingFieldObjectMaintInProgress] = 1,
+                               [ProcessingFieldObjectMaintStartTime] = Getutcdate()
+                        WHERE  [ProcessingFieldObjectMaintInProgress] <> 1
+                               AND [WorkspaceArtifactID] = @WorkspaceArtifactID
+
+                        SELECT @@ROWCOUNT AS [HaveLock]";
+
+                bool output = false;
+
+                 if ((int)eddsDbContext.ExecuteSqlStatementAsScalar(sql, new SqlParameter("@WorkspaceArtifactID", SqlDbType.Int) { Value = workspaceArtifactId }) > 0)
+                {
+                    output = true;
+                }
+                return output;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error occurred while setting the [ProcessingFieldObjectMaintInProgress] column to true in the [EDDS].[eddsdbo].[ProcessingFieldManagerQueue] for Workspace: {workspaceArtifactId}", workspaceArtifactId);
+            }
+            return false;
+        }
+
+        public void EndProcessingFieldObjectMaintenance(int workspaceArtifactId)
+        {
+            try
+            {
+                IDBContext eddsDbContext = Helper.GetDBContext(-1);
+
+                string sql = @"
+                        UPDATE [EDDS].[eddsdbo].[ProcessingFieldManagerQueue]
+                        SET    [ProcessingFieldObjectMaintInProgress] = 0,
+                               [ProcessingFieldObjectMaintLastRun]    = Getutcdate(),
+                               [ProcessingFieldObjectMaintStartTime]  = NULL
+                        WHERE  [WorkspaceArtifactID] = @WorkspaceArtifactID";
+
+                var sqlParams = new List<SqlParameter>
+                {
+                    new SqlParameter("@WorkspaceArtifactID", SqlDbType.Int) { Value = workspaceArtifactId }
+                };
+
+                eddsDbContext.ExecuteNonQuerySQLStatement(sql, sqlParams);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error occurred while ending Processing Field Object Maintenance for Workspace: {workspaceArtifactId}", workspaceArtifactId);
+            }
         }
     }
 }

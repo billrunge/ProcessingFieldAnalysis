@@ -26,16 +26,26 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 InvariantField invariantField = new InvariantField(Helper, Logger);
                 ProcessingField processingField = new ProcessingField(Helper, Logger);
                 OtherMetadata otherMetadata = new OtherMetadata(Helper, Logger);
+                EddsQueue eddsQueue = new EddsQueue(Helper, Logger);
 
-                List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled();
+                eddsQueue.CreateProcessingFieldManagerQueueTable();
+                eddsQueue.PopulateProcessingFieldManagerQueueTable();
 
-                foreach (int workspaceArtifactId in installedWorkspaceArtifactIds)
+                //                List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled();
+
+                List<int> workspacesToManageProcessingFields = eddsQueue.GetListOfWorkspaceArtifactIdsToManageProcessingFields();
+
+                foreach (int workspaceArtifactId in workspacesToManageProcessingFields)
                 {
-                    MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(workspaceArtifactId);
-                    List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
-                    await processingField.PopulateProcessingFieldObjectAsync(workspaceArtifactId, mappableSourceFields, existingProcessingFields);
-                    await processingField.UpdateProcessingFieldObjectsAsync(workspaceArtifactId, mappableSourceFields, existingProcessingFields);
-                    await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
+                    if (eddsQueue.SetProcessingFieldObjectMaintInProgressToTrue(workspaceArtifactId))
+                    {
+                        MappableSourceField[] mappableSourceFields = await invariantField.GetInvariantFieldsAsync(workspaceArtifactId);
+                        List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
+                        await processingField.PopulateProcessingFieldObjectAsync(workspaceArtifactId, mappableSourceFields, existingProcessingFields);
+                        await processingField.UpdateProcessingFieldObjectsAsync(workspaceArtifactId, mappableSourceFields, existingProcessingFields);
+                        eddsQueue.EndProcessingFieldObjectMaintenance(workspaceArtifactId);
+                    }
+                    //await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
                 }
 
                 RaiseMessage("Completed.", 1);
