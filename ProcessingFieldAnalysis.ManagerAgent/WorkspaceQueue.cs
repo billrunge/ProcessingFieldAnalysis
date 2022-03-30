@@ -18,7 +18,34 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             Logger = logger;
         }
 
+        public void CreateWorkspaceQueueTable(int workspaceArtifactId)
+        {
+            try
+            {
+                IDBContext workspaceDbContext = Helper.GetDBContext(workspaceArtifactId);
 
+                string sql = @"
+                        IF Object_id(N'[ProcessingFieldOtherMetadataQueue]', N'U') IS NULL
+                          BEGIN
+                              SET ANSI_NULLS ON
+                              SET QUOTED_IDENTIFIER ON
+
+                              CREATE TABLE [ProcessingFieldOtherMetadataQueue]
+                                (
+                                   [DocumentArtifactID] [int] NOT NULL,
+                                   [Status]             [int] NOT NULL,
+                                   [LastUpdated]        [datetime] NULL
+                                )
+                              ON [PRIMARY]
+                          END";
+
+                workspaceDbContext.ExecuteNonQuerySQLStatement(sql);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error occurred while populating the [ProcessingFieldManagerQueue] table in the EDDS database");
+            }
+        }
 
 
 
