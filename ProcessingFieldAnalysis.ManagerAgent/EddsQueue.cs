@@ -153,7 +153,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 IDBContext eddsDbContext = Helper.GetDBContext(-1);
 
                 string sql = @"
-                        SELECT [WorkspaceArtifactID],
+                        SELECT [WorkspaceArtifactID]
                         FROM   [ProcessingFieldManagerQueue]
                         WHERE  [OtherMetadataAnalysisEnabled] = 1
                         AND  ( [OtherMetadataAnalysisLastRun] IS NULL
@@ -277,7 +277,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         UPDATE [EDDS].[eddsdbo].[ProcessingFieldManagerQueue]
                         SET    [OtherMetadataAnalysisInProgress] = 0,
                                [OtherMetadataAnalysisLastRun]    = Getutcdate(),
-                               [OtherMetadataAnalysisInProgress] = NULL
+                               [OtherMetadataAnalysisStartTime] = NULL
                         WHERE  [WorkspaceArtifactID] = @WorkspaceArtifactID";
 
                 var sqlParams = new List<SqlParameter>
