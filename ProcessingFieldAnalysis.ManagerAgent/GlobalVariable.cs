@@ -31,6 +31,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
         //Other
         public static readonly int OTHER_METADATA_FIELD_PARSING_BATCH_SIZE = 1000;
+        public static readonly int WORKSPACE_QUEUE_TABLE_POPULATION_BATCH_SIZE = 1000;
         public static readonly int PROCESSING_FIELD_MAINTENANCE_HOURLY_INTERVAL = 1;
         public static readonly int OTHER_METADATA_ANALYSIS_HOURLY_INTERVAL = 24;
     }

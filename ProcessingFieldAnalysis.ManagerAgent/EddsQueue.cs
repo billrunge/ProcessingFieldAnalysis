@@ -146,18 +146,18 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             return new List<int>();
         }
 
-        public List<int> GetListOfWorkspaceArtifactIdsToAnalyzeOtherMetadta()
+        public Dictionary<int, bool> GetListOfWorkspaceArtifactIdsToAnalyzeOtherMetadata()
         {
             try
             {
                 IDBContext eddsDbContext = Helper.GetDBContext(-1);
 
                 string sql = @"
-                        SELECT [WorkspaceArtifactID]
+                        SELECT [WorkspaceArtifactID],
+                               [OtherMetadataAnalysisInProgress]
                         FROM   [ProcessingFieldManagerQueue]
                         WHERE  [OtherMetadataAnalysisEnabled] = 1
-                        AND    [OtherMetadataAnalysisInProgress] = 0
-                               AND ( [OtherMetadataAnalysisLastRun] IS NULL
+                        AND  ( [OtherMetadataAnalysisLastRun] IS NULL
                                       OR Datediff(hour, [OtherMetadataAnalysisLastRun], Getutcdate()) >
                                          @HourlyInterval ) ";
 
@@ -167,11 +167,11 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 };
 
                 DataTable results = eddsDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
-                List<int> workspaceArtifactIdList = new List<int>();
+                Dictionary<int, bool> workspaceArtifactIdList = new Dictionary<int, bool>();
 
                 foreach (DataRow row in results.Rows)
                 {
-                    workspaceArtifactIdList.Add((int)row["WorkspaceArtifactID"]);
+                    workspaceArtifactIdList.Add((int)row["WorkspaceArtifactID"], (bool)row["OtherMetadataAnalysisInProgress"]);
                 }
                 return workspaceArtifactIdList;
             }
@@ -179,10 +179,10 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             {
                 Logger.LogError(e, "Error occurred while getting a list of Workspace Artifact IDs to perform Other Metadata analysis");
             }
-            return new List<int>();
+            return new Dictionary<int, bool>();
         }
 
-        public bool SetProcessingFieldObjectMaintInProgressToTrue(int workspaceArtifactId)
+        public bool StartProcessingFieldObjectMaintenance(int workspaceArtifactId)
         {
             try
             {
