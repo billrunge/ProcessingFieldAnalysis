@@ -58,6 +58,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                         List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
                         await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
+                        eddsQueue.EndOtherMetadataAnalysis(workspaceArtifactId);
 
                     }
                     else
