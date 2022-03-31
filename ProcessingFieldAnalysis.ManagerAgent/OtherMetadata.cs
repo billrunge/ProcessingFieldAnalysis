@@ -5,6 +5,8 @@ using Relativity.Services.FieldMapping;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Json;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 
 namespace ProcessingFieldAnalysis.ManagerAgent
@@ -29,15 +31,11 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="existingProcessingFields"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public async Task ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(int workspaceArtifactId, List<MappableField> existingProcessingFields, int batchSize, int requestStart = 1)
+        public async Task ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(int workspaceArtifactId, List<int>documentArtifactIds, List<MappableField> existingProcessingFields, int batchSize, int requestStart = 1)
         {
             try
             {
-                List<OtherMetadataResultObject> workspaceOtherMetadataFieldList = await GetOtherMetadataListAsync(workspaceArtifactId, requestStart, batchSize);
-                if (workspaceOtherMetadataFieldList.Count == batchSize)
-                {
-                    await ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, batchSize, requestStart + batchSize);
-                }
+                List<OtherMetadataResultObject> workspaceOtherMetadataFieldList = await GetOtherMetadataListAsync(workspaceArtifactId, documentArtifactIds, requestStart, batchSize);
 
                 foreach (OtherMetadataResultObject otherMetadataResult in workspaceOtherMetadataFieldList)
                 {
@@ -80,7 +78,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         /// <param name="workspaceArtifactId"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        async Task<List<OtherMetadataResultObject>> GetOtherMetadataListAsync(int workspaceArtifactId, int requestStart, int length)
+        async Task<List<OtherMetadataResultObject>> GetOtherMetadataListAsync(int workspaceArtifactId, List<int> documentArtifactIds, int requestStart, int length)
         {
             using (IObjectManager objectManager = Helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
             {
@@ -96,7 +94,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                             new FieldRef{ Guid = GlobalVariable.DOCUMENT_OBJECT_UNMAPPED_METADATA_MULTI_OBJECT_FIELD }
                         },
                         ObjectType = new ObjectTypeRef { Guid = GlobalVariable.DOCUMENT_OBJECT },
-                        Condition = $"'{otherMetadataFieldName}' ISSET"
+                        Condition = $"'Artifact ID' IN {JsonConvert.SerializeObject(documentArtifactIds)}"
                     };
 
                     QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, requestStart, length);

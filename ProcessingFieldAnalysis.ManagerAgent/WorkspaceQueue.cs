@@ -1,4 +1,5 @@
-﻿using Relativity.API;
+﻿using Newtonsoft.Json;
+using Relativity.API;
 using Relativity.API.Context;
 using Relativity.ObjectManager.V1.Interfaces;
 using Relativity.ObjectManager.V1.Models;
@@ -40,7 +41,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                                 (
                                    [DocumentArtifactID] [int] NOT NULL UNIQUE,
                                    [Status]             [int] NOT NULL,
-                                   [LastUpdated]        [datetime] NULL
+                                   [Started]        [datetime] NULL
                                 )
                               ON [PRIMARY]
 
@@ -83,14 +84,14 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                     inputTable.Columns.Add("DocumentArtifactID", typeof(int));
                     inputTable.Columns.Add("Status", typeof(int));
-                    inputTable.Columns.Add("LastUpdated", typeof(DateTime));
+                    inputTable.Columns.Add("Started", typeof(DateTime));
 
                     foreach (RelativityObject result in queryResult.Objects)
                     {
                         DataRow row = inputTable.NewRow();
                         row["DocumentArtifactID"] = result.ArtifactID;
                         row["Status"] = 0;
-                        row["LastUpdated"] = DBNull.Value;
+                        row["Started"] = DBNull.Value;
                         inputTable.Rows.Add(row);
                     }
 
@@ -141,5 +142,95 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             return false;
         }
+
+        public List<int> CheckOutBatchOfDocumentArtifactIds(int workspaceArtifactId)
+        {
+            try
+            {
+                IDBContext workspaceDbContext = Helper.GetDBContext(workspaceArtifactId);
+
+                string sql = @"
+                        UPDATE TOP (@BatchSize) [ProcessingFieldOtherMetadataQueue]
+                        SET    [DocumentArtifactID] = [DocumentArtifactID],
+                               [Status]  = 1,
+                               [Started] = Getutcdate() 
+                        OUTPUT INSERTED.[DocumentArtifactID]
+                        WHERE  [Status] = 0";
+                
+                var sqlParams = new List<SqlParameter>
+                {
+                    new SqlParameter("@BatchSize", SqlDbType.Int) {Value = GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE}
+                };
+
+                DataTable results = workspaceDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
+
+                List<int> output = new List<int>();
+
+                foreach (DataRow row in results.Rows)
+                {
+                    output.Add((int)row["DocumentArtifactID"]);
+                }
+                return output;
+
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error getting batch of Documents to run Other Metadata analysis on Workspace: {workspaceArtifactId}", workspaceArtifactId);
+            }
+            return new List<int>();
+        }
+
+        //UNTESTED
+        public void CheckInBatchOfDocumentArtifactIds(int workspaceArtifactId, List<int> documentArtifactIds)
+        {
+            try
+            {
+                IDBContext workspaceDbContext = Helper.GetDBContext(workspaceArtifactId);
+
+                string artifactIds = JsonConvert.SerializeObject(documentArtifactIds).Trim('[').Trim(']');
+
+                string sql = $@"
+                        UPDATE [ProcessingFieldOtherMetadataQueue]
+                        SET    [Status] = 2,
+                               [Started] = NULL
+                        WHERE  [DocumentArtifactID] IN ( {artifactIds} )";
+
+                DataTable results = workspaceDbContext.ExecuteSqlStatementAsDataTable(sql);
+
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error checking in a batch of Documents after running Other Metadata analysis on Workspace: {workspaceArtifactId}", workspaceArtifactId);
+            }
+        }
+
+        //NOT FINISHED
+        public bool IsWorkComplete(int workspaceArtifactId)
+        {
+            try
+            {
+                bool output = false;
+                IDBContext workspaceDbContext = Helper.GetDBContext(workspaceArtifactId);
+
+                string artifactIds = JsonConvert.SerializeObject(documentArtifactIds).Trim('[').Trim(']');
+
+                string sql = $@"
+                        UPDATE [ProcessingFieldOtherMetadataQueue]
+                        SET    [Status] = 2,
+                               [Started] = NULL
+                        WHERE  [DocumentArtifactID] IN ( {artifactIds} )";
+
+                DataTable results = workspaceDbContext.ExecuteSqlStatementAsDataTable(sql);
+
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error checking in a batch of Documents after running Other Metadata analysis on Workspace: {workspaceArtifactId}", workspaceArtifactId);
+            }
+            return false;
+        }
+
+
+
     }
 }

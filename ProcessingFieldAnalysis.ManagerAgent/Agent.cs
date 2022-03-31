@@ -56,17 +56,25 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         workspaceQueue.CreateWorkspaceQueueTable(workspaceArtifactId);
                         await workspaceQueue.PopulateWorkspaceQueueTableAsync(workspaceArtifactId, GlobalVariable.WORKSPACE_QUEUE_TABLE_POPULATION_BATCH_SIZE);
 
+                        List<int> documentArtifactIds = new List<int>();
+                        documentArtifactIds = workspaceQueue.CheckOutBatchOfDocumentArtifactIds(workspaceArtifactId);
+
                         List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
-                        await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
+                        await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, documentArtifactIds, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
                         eddsQueue.EndOtherMetadataAnalysis(workspaceArtifactId);
+                        workspaceQueue.CheckInBatchOfDocumentArtifactIds(workspaceArtifactId, documentArtifactIds);
+
 
                     }
                     else
                     {
                         if (workspaceQueue.DoesWorkspaceQueueTableExist(workspaceArtifactId))
                         {
+                            List<int> documentArtifactIds = new List<int>();
+                            documentArtifactIds = workspaceQueue.CheckOutBatchOfDocumentArtifactIds(workspaceArtifactId);
+
                             List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
-                            await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
+                            await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, documentArtifactIds, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
                         }
                     }
                 }
