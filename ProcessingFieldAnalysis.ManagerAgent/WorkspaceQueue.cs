@@ -94,27 +94,6 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         inputTable.Rows.Add(row);
                     }
 
-                    //List<SqlBulkCopyColumnMapping> columnMappings = new List<SqlBulkCopyColumnMapping>
-                    //{
-                    //    new SqlBulkCopyColumnMapping()
-                    //    {
-                    //        SourceColumn = "DocumentArtifactID",
-                    //        DestinationColumn = "DocumentArtifactID"
-                    //    },
-
-                    //    new SqlBulkCopyColumnMapping()
-                    //    {
-                    //        SourceColumn = "Status",
-                    //        DestinationColumn = "Status"
-                    //    },
-
-                    //    new SqlBulkCopyColumnMapping()
-                    //    {
-                    //        SourceColumn = "LastUpdated",
-                    //        DestinationColumn = "LastUpdated"
-                    //    }
-                    //};
-
                     ISqlBulkCopyParameters bulkParams = new SqlBulkCopyParameters() 
                     { 
                         BatchSize = batchSize,
@@ -138,7 +117,29 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
         }
 
+        public bool DoesWorkspaceQueueTableExist(int workspaceArtifactId)
+        {
+            try
+            {
+                IDBContext workspaceDbContext = Helper.GetDBContext(workspaceArtifactId);
 
+                string sql = @"
+                        IF Object_id(N'[ProcessingFieldOtherMetadataQueue]', N'U') IS NULL
+                          BEGIN
+                              SELECT 0
+                          END
+                        ELSE
+                          BEGIN
+                              SELECT 1
+                          END";
 
+                return (bool)workspaceDbContext.ExecuteSqlStatementAsScalar(sql);
+            }
+            catch(Exception e)
+            {
+                Logger.LogError(e, "Error when checking if he workspace queue table exists in Workspace: {workspaceArtifactId}", workspaceArtifactId);
+            }
+            return false;
+        }
     }
 }

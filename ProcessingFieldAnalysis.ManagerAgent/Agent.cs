@@ -31,8 +31,6 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 eddsQueue.CreateProcessingFieldManagerQueueTable();
                 eddsQueue.PopulateProcessingFieldManagerQueueTable();
 
-                //                List<int> installedWorkspaceArtifactIds = workspace.GetWorkspaceArtifactIdsWhereApplicationIsInstalled();
-
                 List<int> workspacesToManageProcessingFields = eddsQueue.GetListOfWorkspaceArtifactIdsToManageProcessingFields();
 
                 foreach (int workspaceArtifactId in workspacesToManageProcessingFields)
@@ -45,23 +43,30 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         await processingField.UpdateProcessingFieldObjectsAsync(workspaceArtifactId, mappableSourceFields, existingProcessingFields);
                         eddsQueue.EndProcessingFieldObjectMaintenance(workspaceArtifactId);
                     }
-                    //await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
                 }
 
-                Dictionary<int, bool> workspacesToAnalyzeOtherMetadata = eddsQueue.GetListOfWorkspaceArtifactIdsToAnalyzeOtherMetadata();
+                List<int> workspacesToAnalyzeOtherMetadata = eddsQueue.GetListOfWorkspaceArtifactIdsToAnalyzeOtherMetadata();
                 WorkspaceQueue workspaceQueue = new WorkspaceQueue(Helper, Logger);
 
-                foreach (KeyValuePair<int, bool> workspaceToAnalyze in workspacesToAnalyzeOtherMetadata)
+                foreach (int workspaceArtifactId in workspacesToAnalyzeOtherMetadata)
                 {
-                    if (workspaceToAnalyze.Value)
+
+                    if (eddsQueue.StartOtherMetadataAnalysis(workspaceArtifactId))
                     {
+                        workspaceQueue.CreateWorkspaceQueueTable(workspaceArtifactId);
+                        await workspaceQueue.PopulateWorkspaceQueueTableAsync(workspaceArtifactId, GlobalVariable.WORKSPACE_QUEUE_TABLE_POPULATION_BATCH_SIZE);
+
+                        List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
+                        await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
 
                     }
                     else
                     {
-                        workspaceQueue.CreateWorkspaceQueueTable(workspaceToAnalyze.Key);
-                        await workspaceQueue.PopulateWorkspaceQueueTableAsync(workspaceToAnalyze.Key, GlobalVariable.WORKSPACE_QUEUE_TABLE_POPULATION_BATCH_SIZE);
-
+                        if (workspaceQueue.DoesWorkspaceQueueTableExist(workspaceArtifactId))
+                        {
+                            List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
+                            await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
+                        }
                     }
                 }
 

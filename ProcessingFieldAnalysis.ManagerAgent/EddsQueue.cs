@@ -146,7 +146,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             return new List<int>();
         }
 
-        public Dictionary<int, bool> GetListOfWorkspaceArtifactIdsToAnalyzeOtherMetadata()
+        public List<int> GetListOfWorkspaceArtifactIdsToAnalyzeOtherMetadata()
         {
             try
             {
@@ -154,7 +154,6 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                 string sql = @"
                         SELECT [WorkspaceArtifactID],
-                               [OtherMetadataAnalysisInProgress]
                         FROM   [ProcessingFieldManagerQueue]
                         WHERE  [OtherMetadataAnalysisEnabled] = 1
                         AND  ( [OtherMetadataAnalysisLastRun] IS NULL
@@ -167,11 +166,11 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 };
 
                 DataTable results = eddsDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
-                Dictionary<int, bool> workspaceArtifactIdList = new Dictionary<int, bool>();
+                List<int> workspaceArtifactIdList = new List<int>();
 
                 foreach (DataRow row in results.Rows)
                 {
-                    workspaceArtifactIdList.Add((int)row["WorkspaceArtifactID"], (bool)row["OtherMetadataAnalysisInProgress"]);
+                    workspaceArtifactIdList.Add((int)row["WorkspaceArtifactID"]);
                 }
                 return workspaceArtifactIdList;
             }
@@ -179,7 +178,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             {
                 Logger.LogError(e, "Error occurred while getting a list of Workspace Artifact IDs to perform Other Metadata analysis");
             }
-            return new Dictionary<int, bool>();
+            return new List<int>();
         }
 
         public bool StartProcessingFieldObjectMaintenance(int workspaceArtifactId)
@@ -235,6 +234,62 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             catch (Exception e)
             {
                 Logger.LogError(e, "Error occurred while ending Processing Field Object Maintenance for Workspace: {workspaceArtifactId}", workspaceArtifactId);
+            }
+        }
+
+        public bool StartOtherMetadataAnalysis(int workspaceArtifactId)
+        {
+            try
+            {
+                IDBContext eddsDbContext = Helper.GetDBContext(-1);
+
+                string sql = @"
+                        UPDATE [EDDS].[eddsdbo].[ProcessingFieldManagerQueue]
+                        SET    [OtherMetadataAnalysisInProgress] = 1,
+                               [OtherMetadataAnalysisStartTime]  = Getutcdate()
+                        WHERE  [OtherMetadataAnalysisInProgress] <> 1
+                               AND [WorkspaceArtifactID] = @WorkspaceArtifactID
+
+                        SELECT @@ROWCOUNT AS [HaveLock]";
+
+                bool output = false;
+
+                if ((int)eddsDbContext.ExecuteSqlStatementAsScalar(sql, new SqlParameter("@WorkspaceArtifactID", SqlDbType.Int) { Value = workspaceArtifactId }) > 0)
+                {
+                    output = true;
+                }
+                return output;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error occurred while setting the [OtherMetadataAnalysisInProgress] column to true in the [EDDS].[eddsdbo].[ProcessingFieldManagerQueue] for Workspace: {workspaceArtifactId}", workspaceArtifactId);
+            }
+            return false;
+        }
+
+        public void EndOtherMetadataAnalysis(int workspaceArtifactId)
+        {
+            try
+            {
+                IDBContext eddsDbContext = Helper.GetDBContext(-1);
+
+                string sql = @"
+                        UPDATE [EDDS].[eddsdbo].[ProcessingFieldManagerQueue]
+                        SET    [OtherMetadataAnalysisInProgress] = 0,
+                               [OtherMetadataAnalysisLastRun]    = Getutcdate(),
+                               [OtherMetadataAnalysisInProgress] = NULL
+                        WHERE  [WorkspaceArtifactID] = @WorkspaceArtifactID";
+
+                var sqlParams = new List<SqlParameter>
+                {
+                    new SqlParameter("@WorkspaceArtifactID", SqlDbType.Int) { Value = workspaceArtifactId }
+                };
+
+                eddsDbContext.ExecuteNonQuerySQLStatement(sql, sqlParams);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error occurred while ending Other Metadata Analysis for Workspace: {workspaceArtifactId}", workspaceArtifactId);
             }
         }
     }
