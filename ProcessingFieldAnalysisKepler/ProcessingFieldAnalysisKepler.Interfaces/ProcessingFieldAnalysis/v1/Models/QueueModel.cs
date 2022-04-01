@@ -9,5 +9,7 @@
         /// Name property.
         /// </summary>
         public string Name { get; set; }
+        public string Message { get; set; }
+        public bool IsEnabled { get; set; }
     }
 }

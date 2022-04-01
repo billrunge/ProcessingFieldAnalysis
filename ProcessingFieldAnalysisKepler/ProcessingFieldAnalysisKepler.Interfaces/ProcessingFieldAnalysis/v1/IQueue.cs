@@ -21,29 +21,110 @@ namespace ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1
         /// <returns><see cref="QueueModel"/> with the name of the workspace.</returns>
         /// <remarks>
         /// Example REST request:
-        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/workspace/1015024
+        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/EnableProcessingFieldObjectMaintenance/1015024
         /// Example REST response:
         ///   {"Name":"Relativity Starter Template"}
         /// </remarks>
         [HttpGet]
-        [Route("workspace/{workspaceID:int}")]
-        Task<QueueModel> GetWorkspaceNameAsync(int workspaceID);
-
+        [Route("EnableProcessingFieldObjectMaintenance/{workspaceId:int}")]
+        Task<QueueModel> EnableProcessingFieldObjectMaintenance(int workspaceId);
         /// <summary>
-        /// Query for a workspace by name
+        /// Get workspace name.
         /// </summary>
-        /// <param name="queryString">Partial name of a workspace to query for.</param>
-        /// <param name="limit">Limit the number of results via a query string parameter. (Default 10)</param>
-        /// <returns>Collection of <see cref="QueueModel"/> containing workspace names that match the query string.</returns>
+        /// <param name="workspaceID">Workspace ArtifactID.</param>
+        /// <returns><see cref="QueueModel"/> with the name of the workspace.</returns>
         /// <remarks>
         /// Example REST request:
-        ///   [POST] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/workspace?limit=2
-        ///   { "queryString":"a" }
+        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/DisableProcessingFieldObjectMaintenance/1015024
         /// Example REST response:
-        ///   [{"Name":"New Case Template"},{"Name":"Relativity Starter Template"}]
+        ///   {"Name":"Relativity Starter Template"}
         /// </remarks>
-        [HttpPost]
-        [Route("workspace?{limit}")]
-        Task<List<QueueModel>> QueryWorkspaceByNameAsync(string queryString, int limit = 10);
+        [HttpGet]
+        [Route("DisableProcessingFieldObjectMaintenance/{workspaceId:int}")]
+        Task<QueueModel> DisableProcessingFieldObjectMaintenance(int workspaceId);
+        /// <summary>
+        /// Get workspace name.
+        /// </summary>
+        /// <param name="workspaceID">Workspace ArtifactID.</param>
+        /// <returns><see cref="QueueModel"/> with the name of the workspace.</returns>
+        /// <remarks>
+        /// Example REST request:
+        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/ForceProcessingFieldObjectMaintenance/1015024
+        /// Example REST response:
+        ///   {"Name":"Relativity Starter Template"}
+        /// </remarks>
+        [HttpGet]
+        [Route("ForceProcessingFieldObjectMaintenance/{workspaceId:int}")]
+        Task<QueueModel> ForceProcessingFieldObjectMaintenance(int workspaceId);
+        /// <summary>
+        /// Get workspace name.
+        /// </summary>
+        /// <param name="workspaceID">Workspace ArtifactID.</param>
+        /// <returns><see cref="QueueModel"/> with the name of the workspace.</returns>
+        /// <remarks>
+        /// Example REST request:
+        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/IsProcessingFieldObjectMaintenanceEnabled/1015024
+        /// Example REST response:
+        ///   {"Name":"Relativity Starter Template"}
+        /// </remarks>
+        [HttpGet]
+        [Route("IsProcessingFieldObjectMaintenanceEnabled/{workspaceId:int}")]
+        Task<QueueModel> IsProcessingFieldObjectMaintenanceEnabled(int workspaceId);
+        /// <summary>
+        /// Get workspace name.
+        /// </summary>
+        /// <param name="workspaceID">Workspace ArtifactID.</param>
+        /// <returns><see cref="QueueModel"/> with the name of the workspace.</returns>
+        /// <remarks>
+        /// Example REST request:
+        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/EnableOtherMetadataAnalysis/1015024
+        /// Example REST response:
+        ///   {"Name":"Relativity Starter Template"}
+        /// </remarks>
+        [HttpGet]
+        [Route("EnableOtherMetadataAnalysis/{workspaceId:int}")]
+        Task<QueueModel> EnableOtherMetadataAnalysis(int workspaceId);
+        /// <summary>
+        /// Get workspace name.
+        /// </summary>
+        /// <param name="workspaceID">Workspace ArtifactID.</param>
+        /// <returns><see cref="QueueModel"/> with the name of the workspace.</returns>
+        /// <remarks>
+        /// Example REST request:
+        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/DisableOtherMetadataAnalysis/1015024
+        /// Example REST response:
+        ///   {"Name":"Relativity Starter Template"}
+        /// </remarks>
+        [HttpGet]
+        [Route("DisableOtherMetadataAnalysis/{workspaceId:int}")]
+        Task<QueueModel> DisableOtherMetadataAnalysis(int workspaceId);
+        /// <summary>
+        /// Get workspace name.
+        /// </summary>
+        /// <param name="workspaceID">Workspace ArtifactID.</param>
+        /// <returns><see cref="QueueModel"/> with the name of the workspace.</returns>
+        /// <remarks>
+        /// Example REST request:
+        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/ForceOtherMetadataAnalysis/1015024
+        /// Example REST response:
+        ///   {"Name":"Relativity Starter Template"}
+        /// </remarks>
+        [HttpGet]
+        [Route("ForceOtherMetadataAnalysis/{workspaceId:int}")]
+        Task<QueueModel> ForceOtherMetadataAnalysis(int workspaceId);
+        /// <summary>
+        /// Get workspace name.
+        /// </summary>
+        /// <param name="workspaceID">Workspace ArtifactID.</param>
+        /// <returns><see cref="QueueModel"/> with the name of the workspace.</returns>
+        /// <remarks>
+        /// Example REST request:
+        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/IsOtherMetadataAnalysisEnabled/1015024
+        /// Example REST response:
+        ///   {"Name":"Relativity Starter Template"}
+        /// </remarks>
+        [HttpGet]
+        [Route("IsOtherMetadataAnalysisEnabled/{workspaceId:int}")]
+        Task<QueueModel> IsOtherMetadataAnalysisEnabled(int workspaceId);
     }
 }
