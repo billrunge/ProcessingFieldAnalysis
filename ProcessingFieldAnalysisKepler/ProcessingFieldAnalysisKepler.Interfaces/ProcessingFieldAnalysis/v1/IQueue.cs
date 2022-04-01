@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Relativity.Kepler.Services;
-using ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1.Models;
+using ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1.Models;
 
-namespace ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1
+namespace ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1
 {
     /// <summary>
     /// MyService Service Interface.
@@ -21,13 +21,13 @@ namespace ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1
         /// <returns><see cref="QueueModel"/> with the name of the workspace.</returns>
         /// <remarks>
         /// Example REST request:
-        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/EnableProcessingFieldObjectMaintenance/1015024
+        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/workspace/1015024
         /// Example REST response:
         ///   {"Name":"Relativity Starter Template"}
         /// </remarks>
         [HttpGet]
-        [Route("EnableProcessingFieldObjectMaintenance/{workspaceID:int}")]
-        Task<QueueModel> EnableProcessingFieldObjectMaintenance(int workspaceID);
+        [Route("workspace/{workspaceID:int}")]
+        Task<QueueModel> GetWorkspaceNameAsync(int workspaceID);
 
         /// <summary>
         /// Query for a workspace by name

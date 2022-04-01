@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysis.ManagerAgent", "ProcessingFieldAnalysis.ManagerAgent\ProcessingFieldAnalysis.ManagerAgent.csproj", "{9BBFB2C2-DA53-4472-9B28-62457EA7BFE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisApi.Services", "ProcessingFieldAnalysis.KeplerApi\ProcessingFieldAnalysis.KeplerApi.Services\ProcessingFieldAnalysisApi.Services.csproj", "{E75E4754-6341-4334-85CD-095FC68AD934}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisKepler.Services", "ProcessingFieldAnalysisKepler\ProcessingFieldAnalysisKepler.Services\ProcessingFieldAnalysisKepler.Services.csproj", "{EC5C30E7-DF51-4D7D-B08E-6C9115408207}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisApi.Interfaces", "ProcessingFieldAnalysis.KeplerApi\ProcessingFieldAnalysis.KeplerApi.Interfaces\ProcessingFieldAnalysisApi.Interfaces.csproj", "{5E011BFF-6B8B-4B4A-9001-CB9578379DC3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisKepler.Interfaces", "ProcessingFieldAnalysisKepler\ProcessingFieldAnalysisKepler.Interfaces\ProcessingFieldAnalysisKepler.Interfaces.csproj", "{47DFC9CE-BAD8-4AF7-B91C-66FDEFFB5A14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,14 @@ Global
 		{9BBFB2C2-DA53-4472-9B28-62457EA7BFE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9BBFB2C2-DA53-4472-9B28-62457EA7BFE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9BBFB2C2-DA53-4472-9B28-62457EA7BFE7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E75E4754-6341-4334-85CD-095FC68AD934}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E75E4754-6341-4334-85CD-095FC68AD934}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E75E4754-6341-4334-85CD-095FC68AD934}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E75E4754-6341-4334-85CD-095FC68AD934}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5E011BFF-6B8B-4B4A-9001-CB9578379DC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5E011BFF-6B8B-4B4A-9001-CB9578379DC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5E011BFF-6B8B-4B4A-9001-CB9578379DC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5E011BFF-6B8B-4B4A-9001-CB9578379DC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC5C30E7-DF51-4D7D-B08E-6C9115408207}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC5C30E7-DF51-4D7D-B08E-6C9115408207}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC5C30E7-DF51-4D7D-B08E-6C9115408207}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC5C30E7-DF51-4D7D-B08E-6C9115408207}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47DFC9CE-BAD8-4AF7-B91C-66FDEFFB5A14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47DFC9CE-BAD8-4AF7-B91C-66FDEFFB5A14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47DFC9CE-BAD8-4AF7-B91C-66FDEFFB5A14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47DFC9CE-BAD8-4AF7-B91C-66FDEFFB5A14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

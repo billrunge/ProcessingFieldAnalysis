@@ -1,4 +1,4 @@
-﻿namespace ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1.Models
+﻿namespace ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1.Models
 {
     /// <summary>
     /// QueueModel Data Model.

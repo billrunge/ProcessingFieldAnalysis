@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ProcessingFieldAnalysis.KeplerApi.Interfaces")]
+[assembly: AssemblyTitle("ProcessingFieldAnalysisKepler.Services")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ProcessingFieldAnalysis.KeplerApi.Interfaces")]
+[assembly: AssemblyProduct("ProcessingFieldAnalysisKepler.Services")]
 [assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("5e011bff-6b8b-4b4a-9001-cb9578379dc3")]
+[assembly: Guid("ec5c30e7-df51-4d7d-b08e-6c9115408207")]
 
 // Version information for an assembly consists of the following four values:
 //

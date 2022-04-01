@@ -6,12 +6,11 @@ using Relativity.API;
 using Relativity.API.Context;
 using Relativity.Kepler.Logging;
 using Relativity.Services.Exceptions;
-using ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1;
-using ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1.Exceptions;
-using ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1.Models;
-using System.Data;
+using ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1;
+using ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1.Exceptions;
+using ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1.Models;
 
-namespace ProcessingFieldAnalysisApi.Services.ProcessingFieldAnalysis.v1
+namespace ProcessingFieldAnalysisKepler.Services.ProcessingFieldAnalysis.v1
 {
     public class Queue : IQueue
     {
@@ -26,26 +25,23 @@ namespace ProcessingFieldAnalysisApi.Services.ProcessingFieldAnalysis.v1
             _helper = helper;
         }
 
-        public async Task<QueueModel> EnableProcessingFieldObjectMaintenance(int workspaceID)
+        public async Task<QueueModel> GetWorkspaceNameAsync(int workspaceID)
         {
             QueueModel model;
 
             try
             {
-                string workspaceName = await _helper.GetDBContext(-1).ExecuteScalarAsync<string>(new ContextQuery()
+                // Use the dependency injected IHelper to get a database connection.
+                // In this example a query is being made for the name of a workspace from the workspaceID.
+                // Note: async/await and ConfigureAwait(false) is used when making calls external to the service.
+                //       See https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/
+                //       See also https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.configureawait
+                //       See also https://blogs.msdn.microsoft.com/benwilli/2017/02/09/an-alternative-to-configureawaitfalse-everywhere/
+                //       See also https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
+                //       Warning: Improper use of the tasks can cause deadlocks and performance issues within an application.
+                string workspaceName = await _helper.GetDBContext(workspaceID).ExecuteScalarAsync<string>(new ContextQuery()
                 {
-                    SqlStatement = @"
-                            UPDATE [ProcessingFieldManagerQueue]
-                            SET    [ProcessingFieldObjectMaintEnabled] = 1
-                            WHERE  [WorkspaceArtifactID] = @WorkspaceArtifactID",
-                    Parameters = new List<SqlParameter>() 
-                    { 
-                        new SqlParameter() 
-                        { 
-                            ParameterName = "@WorkspaceArtifactID", 
-                            SqlDbType = SqlDbType.Int, Value = workspaceID 
-                        } 
-                    }
+                    SqlStatement = "SELECT [TextIdentifier] FROM [EDDSDBO].[Artifact] WHERE [ArtifactTypeID] = 8"
                 }).ConfigureAwait(false);
 
                 model = new QueueModel
@@ -55,8 +51,11 @@ namespace ProcessingFieldAnalysisApi.Services.ProcessingFieldAnalysis.v1
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "Could not enable Processing Field Object Maintenance for Workspace: {WorkspaceID}.", workspaceID);
-                throw new QueueException($"Could not enable Processing Field Object Maintenance for Workspace: {workspaceID}.")
+                // Note: logging templates should never use interpolation! Doing so will cause memory leaks. 
+                _logger.LogWarning(exception, "Could not read workspace {WorkspaceID}.", workspaceID);
+
+                // Throwing a user defined exception with a 404 status code with an additional custom FaultSafe object.
+                throw new QueueException($"Workspace {workspaceID} not found.")
                 {
                     FaultSafeObject = new QueueException.FaultSafeInfo()
                     {
@@ -117,7 +116,7 @@ namespace ProcessingFieldAnalysisApi.Services.ProcessingFieldAnalysis.v1
                     //       See also https://blogs.msdn.microsoft.com/benwilli/2017/02/09/an-alternative-to-configureawaitfalse-everywhere/
                     //       See also https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
                     //       Warning: Improper use of the tasks can cause deadlocks and performance issues within an application.
-                    QueueModel wsModel = await proxy.EnableProcessingFieldObjectMaintenance(workspaceID).ConfigureAwait(false);
+                    QueueModel wsModel = await proxy.GetWorkspaceNameAsync(workspaceID).ConfigureAwait(false);
                     if (wsModel != null)
                     {
                         models.Add(wsModel);

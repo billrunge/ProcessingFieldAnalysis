@@ -3,10 +3,10 @@ using System.Net;
 using System.Runtime.Serialization;
 using Relativity.Services.Exceptions;
 
-namespace ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1.Exceptions
+namespace ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1.Exceptions
 {
     // Note: Set the ExceptionIdentifier so that exceptions can be identified across namespaces.
-    [ExceptionIdentifier("0e1cb41f-52dc-466f-8c13-af7fb13cd6cd")]
+    [ExceptionIdentifier("3db644ac-db88-4062-aa6a-0fe329811e5f")]
     [FaultCode(HttpStatusCode.NotFound)]
     public class QueueException : ServiceException
     {

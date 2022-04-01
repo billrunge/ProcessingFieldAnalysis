@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{E75E4754-6341-4334-85CD-095FC68AD934}</ProjectGuid>
+    <ProjectGuid>{47DFC9CE-BAD8-4AF7-B91C-66FDEFFB5A14}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProcessingFieldAnalysisApi.Services</RootNamespace>
-    <AssemblyName>ProcessingFieldAnalysisApi.Services</AssemblyName>
+    <RootNamespace>ProcessingFieldAnalysisKepler.Interfaces</RootNamespace>
+    <AssemblyName>ProcessingFieldAnalysisKepler.Interfaces</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -52,8 +52,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ProcessingFieldAnalysis\ProcessingFieldAnalysisModule.cs" />
-    <Compile Include="ProcessingFieldAnalysis\v1\Queue.cs" />
+    <Compile Include="ProcessingFieldAnalysis\IProcessingFieldAnalysisModule.cs" />
+    <Compile Include="ProcessingFieldAnalysis\v1\IQueue.cs" />
+    <Compile Include="ProcessingFieldAnalysis\v1\Exceptions\QueueException.cs" />
+    <Compile Include="ProcessingFieldAnalysis\v1\Models\QueueModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -61,12 +63,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ProcessingFieldAnalysis.KeplerApi.Interfaces\ProcessingFieldAnalysisApi.Interfaces.csproj">
-      <Project>{5e011bff-6b8b-4b4a-9001-cb9578379dc3}</Project>
-      <Name>ProcessingFieldAnalysisApi.Interfaces</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
