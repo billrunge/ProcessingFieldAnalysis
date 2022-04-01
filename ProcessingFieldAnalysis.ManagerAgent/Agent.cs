@@ -53,28 +53,41 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                     if (eddsQueue.StartOtherMetadataAnalysis(workspaceArtifactId))
                     {
+                        
                         workspaceQueue.CreateWorkspaceQueueTable(workspaceArtifactId);
                         await workspaceQueue.PopulateWorkspaceQueueTableAsync(workspaceArtifactId, GlobalVariable.WORKSPACE_QUEUE_TABLE_POPULATION_BATCH_SIZE);
+                        workspaceQueue.ResetQueueTable(workspaceArtifactId);
 
-                        List<int> documentArtifactIds = new List<int>();
-                        documentArtifactIds = workspaceQueue.CheckOutBatchOfDocumentArtifactIds(workspaceArtifactId);
-
-                        List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
-                        await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, documentArtifactIds, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
-                        eddsQueue.EndOtherMetadataAnalysis(workspaceArtifactId);
-                        workspaceQueue.CheckInBatchOfDocumentArtifactIds(workspaceArtifactId, documentArtifactIds);
-
-
-                    }
-                    else
-                    {
-                        if (workspaceQueue.DoesWorkspaceQueueTableExist(workspaceArtifactId))
+                        bool isWorkComplete = workspaceQueue.IsWorkComplete(workspaceArtifactId);
+                        while (!isWorkComplete)
                         {
+
                             List<int> documentArtifactIds = new List<int>();
                             documentArtifactIds = workspaceQueue.CheckOutBatchOfDocumentArtifactIds(workspaceArtifactId);
 
                             List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
                             await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, documentArtifactIds, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
+
+                            workspaceQueue.CheckInBatchOfDocumentArtifactIds(workspaceArtifactId, documentArtifactIds);
+                            isWorkComplete = workspaceQueue.IsWorkComplete(workspaceArtifactId);
+                        }
+                        eddsQueue.EndOtherMetadataAnalysis(workspaceArtifactId);
+                    }
+                    else
+                    {
+                        if (workspaceQueue.DoesWorkspaceQueueTableExist(workspaceArtifactId))
+                        {
+                            bool isWorkComplete = workspaceQueue.IsWorkComplete(workspaceArtifactId);
+                            while (!isWorkComplete)
+                            {
+                                List<int> documentArtifactIds = new List<int>();
+                                documentArtifactIds = workspaceQueue.CheckOutBatchOfDocumentArtifactIds(workspaceArtifactId);
+
+                                List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
+                                await otherMetadata.ParseOtherMetadataFieldAndLinkMissingProcessingFieldsAsync(workspaceArtifactId, documentArtifactIds, existingProcessingFields, GlobalVariable.OTHER_METADATA_FIELD_PARSING_BATCH_SIZE);
+                                workspaceQueue.CheckInBatchOfDocumentArtifactIds(workspaceArtifactId, documentArtifactIds);
+                                isWorkComplete = workspaceQueue.IsWorkComplete(workspaceArtifactId);
+                            }
                         }
                     }
                 }

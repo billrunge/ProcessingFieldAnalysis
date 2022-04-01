@@ -180,7 +180,6 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             return new List<int>();
         }
 
-        //UNTESTED
         public void CheckInBatchOfDocumentArtifactIds(int workspaceArtifactId, List<int> documentArtifactIds)
         {
             try
@@ -195,7 +194,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                                [Started] = NULL
                         WHERE  [DocumentArtifactID] IN ( {artifactIds} )";
 
-                DataTable results = workspaceDbContext.ExecuteSqlStatementAsDataTable(sql);
+                workspaceDbContext.ExecuteNonQuerySQLStatement(sql);
 
             }
             catch (Exception e)
@@ -204,7 +203,6 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
         }
 
-        //NOT FINISHED
         public bool IsWorkComplete(int workspaceArtifactId)
         {
             try
@@ -212,25 +210,48 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 bool output = false;
                 IDBContext workspaceDbContext = Helper.GetDBContext(workspaceArtifactId);
 
-                string artifactIds = JsonConvert.SerializeObject(documentArtifactIds).Trim('[').Trim(']');
+                string sql = $@"
+                        SELECT CASE
+                                 WHEN ( Count(*) < 1 ) THEN 1
+                                 ELSE 0
+                               END AS [IsWorkComplete]
+                        FROM   [processingfieldothermetadataqueue]
+                        WHERE  [status] = 0";
+
+                int result = (int)workspaceDbContext.ExecuteSqlStatementAsScalar(sql);
+
+                if (result > 0)
+                {
+                    output = true;
+                }
+
+                return output;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error checking if work is complete for Other Metadata analysis in Workspace: {workspaceArtifactId}", workspaceArtifactId);
+            }
+            return true;
+        }
+
+        public void ResetQueueTable(int workspaceArtifactId)
+        {
+            try
+            {
+                IDBContext workspaceDbContext = Helper.GetDBContext(workspaceArtifactId);
 
                 string sql = $@"
                         UPDATE [ProcessingFieldOtherMetadataQueue]
-                        SET    [Status] = 2,
-                               [Started] = NULL
-                        WHERE  [DocumentArtifactID] IN ( {artifactIds} )";
+                        SET    [Status] = 0,
+                               [Started] = NULL";
 
-                DataTable results = workspaceDbContext.ExecuteSqlStatementAsDataTable(sql);
+                workspaceDbContext.ExecuteNonQuerySQLStatement(sql);
 
             }
             catch (Exception e)
             {
-                Logger.LogError(e, "Error checking in a batch of Documents after running Other Metadata analysis on Workspace: {workspaceArtifactId}", workspaceArtifactId);
+                Logger.LogError(e, "Error resetting queue table for Other Metadata analysis on Workspace: {workspaceArtifactId}", workspaceArtifactId);
             }
-            return false;
         }
-
-
-
     }
 }
