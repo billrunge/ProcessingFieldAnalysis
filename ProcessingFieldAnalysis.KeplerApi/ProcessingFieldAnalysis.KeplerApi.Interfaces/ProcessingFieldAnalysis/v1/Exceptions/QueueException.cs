@@ -3,7 +3,7 @@ using System.Net;
 using System.Runtime.Serialization;
 using Relativity.Services.Exceptions;
 
-namespace ProcessingFieldAnalysis.KeplerApi.Interfaces.ProcessingFieldAnalysis.v1.Exceptions
+namespace ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1.Exceptions
 {
     // Note: Set the ExceptionIdentifier so that exceptions can be identified across namespaces.
     [ExceptionIdentifier("0e1cb41f-52dc-466f-8c13-af7fb13cd6cd")]

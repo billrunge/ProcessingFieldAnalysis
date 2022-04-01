@@ -6,12 +6,12 @@ using Relativity.API;
 using Relativity.API.Context;
 using Relativity.Kepler.Logging;
 using Relativity.Services.Exceptions;
-using ProcessingFieldAnalysis.KeplerApi.Interfaces.ProcessingFieldAnalysis.v1;
-using ProcessingFieldAnalysis.KeplerApi.Interfaces.ProcessingFieldAnalysis.v1.Exceptions;
-using ProcessingFieldAnalysis.KeplerApi.Interfaces.ProcessingFieldAnalysis.v1.Models;
+using ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1;
+using ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1.Exceptions;
+using ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1.Models;
 using System.Data;
 
-namespace ProcessingFieldAnalysis.KeplerApi.Services.ProcessingFieldAnalysis.v1
+namespace ProcessingFieldAnalysisApi.Services.ProcessingFieldAnalysis.v1
 {
     public class Queue : IQueue
     {
@@ -117,7 +117,7 @@ namespace ProcessingFieldAnalysis.KeplerApi.Services.ProcessingFieldAnalysis.v1
                     //       See also https://blogs.msdn.microsoft.com/benwilli/2017/02/09/an-alternative-to-configureawaitfalse-everywhere/
                     //       See also https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
                     //       Warning: Improper use of the tasks can cause deadlocks and performance issues within an application.
-                    QueueModel wsModel = await proxy.GetWorkspaceNameAsync(workspaceID).ConfigureAwait(false);
+                    QueueModel wsModel = await proxy.EnableProcessingFieldObjectMaintenance(workspaceID).ConfigureAwait(false);
                     if (wsModel != null)
                     {
                         models.Add(wsModel);

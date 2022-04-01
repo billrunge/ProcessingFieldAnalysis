@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Relativity.Kepler.Services;
-using ProcessingFieldAnalysis.KeplerApi.Interfaces.ProcessingFieldAnalysis.v1.Models;
+using ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1.Models;
 
-namespace ProcessingFieldAnalysis.KeplerApi.Interfaces.ProcessingFieldAnalysis.v1
+namespace ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis.v1
 {
     /// <summary>
     /// MyService Service Interface.

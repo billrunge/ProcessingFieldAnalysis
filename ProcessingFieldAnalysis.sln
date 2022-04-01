@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysis.ManagerAgent", "ProcessingFieldAnalysis.ManagerAgent\ProcessingFieldAnalysis.ManagerAgent.csproj", "{9BBFB2C2-DA53-4472-9B28-62457EA7BFE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysis.KeplerApi.Services", "ProcessingFieldAnalysis.KeplerApi\ProcessingFieldAnalysis.KeplerApi.Services\ProcessingFieldAnalysis.KeplerApi.Services.csproj", "{E75E4754-6341-4334-85CD-095FC68AD934}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisApi.Services", "ProcessingFieldAnalysis.KeplerApi\ProcessingFieldAnalysis.KeplerApi.Services\ProcessingFieldAnalysisApi.Services.csproj", "{E75E4754-6341-4334-85CD-095FC68AD934}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysis.KeplerApi.Interfaces", "ProcessingFieldAnalysis.KeplerApi\ProcessingFieldAnalysis.KeplerApi.Interfaces\ProcessingFieldAnalysis.KeplerApi.Interfaces.csproj", "{5E011BFF-6B8B-4B4A-9001-CB9578379DC3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisApi.Interfaces", "ProcessingFieldAnalysis.KeplerApi\ProcessingFieldAnalysis.KeplerApi.Interfaces\ProcessingFieldAnalysisApi.Interfaces.csproj", "{5E011BFF-6B8B-4B4A-9001-CB9578379DC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

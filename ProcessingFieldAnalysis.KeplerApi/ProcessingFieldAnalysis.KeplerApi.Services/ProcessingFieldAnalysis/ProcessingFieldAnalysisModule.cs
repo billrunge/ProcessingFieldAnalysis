@@ -1,6 +1,6 @@
-﻿using ProcessingFieldAnalysis.KeplerApi.Interfaces.ProcessingFieldAnalysis;
+﻿using ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis;
 
-namespace ProcessingFieldAnalysis.KeplerApi.Services.ProcessingFieldAnalysis
+namespace ProcessingFieldAnalysisApi.Services.ProcessingFieldAnalysis
 {
     public class ProcessingFieldAnalysisModule : IProcessingFieldAnalysisModule
     {

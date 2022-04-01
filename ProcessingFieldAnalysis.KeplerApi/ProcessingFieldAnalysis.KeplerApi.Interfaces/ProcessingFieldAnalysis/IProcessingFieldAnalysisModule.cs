@@ -1,6 +1,6 @@
 ﻿using Relativity.Kepler.Services;
 
-namespace ProcessingFieldAnalysis.KeplerApi.Interfaces.ProcessingFieldAnalysis
+namespace ProcessingFieldAnalysisApi.Interfaces.ProcessingFieldAnalysis
 {
     /// <summary>
     /// ProcessingFieldAnalysis Module Interface.
