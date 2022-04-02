@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisKepl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisKepler.Interfaces", "ProcessingFieldAnalysisKepler\ProcessingFieldAnalysisKepler.Interfaces\ProcessingFieldAnalysisKepler.Interfaces.csproj", "{47DFC9CE-BAD8-4AF7-B91C-66FDEFFB5A14}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysis.ConsoleEventHandler", "ProcessingFieldAnalysis.ConsoleEventHandler\ProcessingFieldAnalysis.ConsoleEventHandler.csproj", "{AC9443B7-AB3C-4237-A2DC-97112F1CC8C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{47DFC9CE-BAD8-4AF7-B91C-66FDEFFB5A14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47DFC9CE-BAD8-4AF7-B91C-66FDEFFB5A14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47DFC9CE-BAD8-4AF7-B91C-66FDEFFB5A14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC9443B7-AB3C-4237-A2DC-97112F1CC8C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC9443B7-AB3C-4237-A2DC-97112F1CC8C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC9443B7-AB3C-4237-A2DC-97112F1CC8C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC9443B7-AB3C-4237-A2DC-97112F1CC8C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
