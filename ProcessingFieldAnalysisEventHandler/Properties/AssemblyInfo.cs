@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ProcessingFieldAnalysis.ConsoleEventHandler")]
+[assembly: AssemblyTitle("ProcessingFieldAnalysisEventHandler")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Relativity")]
-[assembly: AssemblyProduct("ProcessingFieldAnalysis.ConsoleEventHandler")]
+[assembly: AssemblyProduct("ProcessingFieldAnalysisEventHandler")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
