@@ -134,7 +134,9 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                               SELECT 1
                           END";
 
-                return (bool)workspaceDbContext.ExecuteSqlStatementAsScalar(sql);
+                int result = (int)workspaceDbContext.ExecuteSqlStatementAsScalar(sql);
+
+                return (result > 0);
             }
             catch(Exception e)
             {
