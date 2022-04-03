@@ -20,9 +20,9 @@
 
             var forceprocFieldObjectMaintButton =
             {
-                name:`Force Processing Field Object Maintenance`,
+                name: `Force Processing Field Object Maintenance`,
                 eventName: `force_proc_field_obj_maint`
-            }
+            };
 
             if (isProcFieldObjectMaintEnabled) {
                 buttons.push(forceprocFieldObjectMaintButton);
@@ -50,9 +50,10 @@
                 toolbarClass: "proc-field-obj-toolbar",
                 template: "",
                 buttons: buttons,
-                init: function (scope) {
+                init: function (scope, el) {
                     scope.$on("enable_proc_field_obj_maint", function () {
                         enableProcessingFieldObjectMaintenance();
+                        console.log(el);
                     });
                     scope.$on("enable_other_metadata_analysis", function () {
                         enableOtherMetadataFieldAnalysis();
