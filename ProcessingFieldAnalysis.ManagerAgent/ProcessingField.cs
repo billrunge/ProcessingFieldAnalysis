@@ -354,18 +354,59 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                 {
                     if (fieldValues.Count > 0)
                     {
-                        var massCreateRequest = new MassCreateRequest
+                        if (fieldValues.Count <= GlobalVariable.PROCESSING_FIELD_OBJECT_MASS_CREATE_BATCH_SIZE)
                         {
-                            ObjectType = new ObjectTypeRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT },
-                            Fields = fields,
-                            ValueLists = fieldValues
-                        };
+                            var massCreateRequest = new MassCreateRequest
+                            {
+                                ObjectType = new ObjectTypeRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT },
+                                Fields = fields,
+                                ValueLists = fieldValues
+                            };
 
-                        return await objectManager.CreateAsync(workspaceArtifactId, massCreateRequest);
+                            return await objectManager.CreateAsync(workspaceArtifactId, massCreateRequest);
+                        }
+                        else
+                        {
+                            List<List<object>> batchfieldValues = new List<List<object>>();
+                            int loopCount = 0;
+
+                            foreach (List<object> fieldValue in fieldValues)
+                            {
+                                batchfieldValues.Add(fieldValue);
+                                loopCount += 1;
+
+                                if (batchfieldValues.Count >= GlobalVariable.PROCESSING_FIELD_OBJECT_MASS_CREATE_BATCH_SIZE)
+                                {
+                                    var massCreateRequest = new MassCreateRequest
+                                    {
+                                        ObjectType = new ObjectTypeRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT },
+                                        Fields = fields,
+                                        ValueLists = batchfieldValues
+                                    };
+                                    await objectManager.CreateAsync(workspaceArtifactId, massCreateRequest);
+
+                                    batchfieldValues = new List<List<object>>();
+                                }
+                                if (loopCount >= fieldValues.Count && batchfieldValues.Count > 0)
+                                {
+                                    var massCreateRequest = new MassCreateRequest
+                                    {
+                                        ObjectType = new ObjectTypeRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT },
+                                        Fields = fields,
+                                        ValueLists = batchfieldValues
+                                    };
+                                    return await objectManager.CreateAsync(workspaceArtifactId, massCreateRequest);                        
+                                } else if (loopCount >= fieldValues.Count)
+                                {
+                                    return new MassCreateResult();
+                                }
+
+                            }
+                        } 
                     }
                     else
                     {
-                        return null;
+                        return new MassCreateResult();
                     }
                 }
                 catch (Exception exception)
