@@ -75,8 +75,11 @@ namespace ProcessingFieldAnalysis.ManagerAgent
 
                     QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, requestStart, batchSize);
 
-                    if (queryResult.TotalCount == batchSize)
+
+
+                    if ((batchSize + requestStart) < queryResult.TotalCount)
                     {
+
                         await PopulateWorkspaceQueueTableAsync(workspaceArtifactId, batchSize, requestStart + batchSize);
                     }
 
