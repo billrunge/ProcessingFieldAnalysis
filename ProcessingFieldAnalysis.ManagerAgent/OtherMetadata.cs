@@ -43,7 +43,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     foreach (MappableField mappableField in existingProcessingFields)
                     {
 
-                        if (otherMetadataResult.OtherMetadataFieldValue.Contains(mappableField.SourceName))
+                        if (otherMetadataResult.OtherMetadataFieldValue.Contains($"{mappableField.SourceName}="))
                         {
                             linkedProcessingFields.Add(mappableField.ArtifactId);
                         }
