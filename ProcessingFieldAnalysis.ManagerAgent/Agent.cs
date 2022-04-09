@@ -19,8 +19,6 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             IAPILog Logger = Helper.GetLoggerFactory().GetLogger();
             try
             {
-
-
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 Workspace workspace = new Workspace(Helper, Logger);
                 InvariantField invariantField = new InvariantField(Helper, Logger);
