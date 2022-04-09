@@ -417,5 +417,69 @@ namespace ProcessingFieldAnalysis.ManagerAgent
             }
             return new MassCreateResult();
         }
+        public async Task UpdateDocumentCountFieldAsync(int workspaceArtifactId, int batchSize, int requestStart = 1)
+        {
+            try
+            {
+                using (IObjectManager objectManager = Helper.GetServicesManager().CreateProxy<IObjectManager>(ExecutionIdentity.CurrentUser))
+                {
+                    Workspace workspace = new Workspace(Helper, Logger);
+                    string documentsFieldName = workspace.GetTextIdentifierByGuid(workspaceArtifactId, GlobalVariable.PROCESSING_FIELD_OBJECT_DOCUMENTS_FIELD);
+
+                    var queryRequest = new QueryRequest()
+                    {
+                        ObjectType = new ObjectTypeRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT },
+                        Condition = $"((('{documentsFieldName}' SUBQUERY ((('{documentsFieldName}' ISSET))))))",
+                        Fields = new List<FieldRef>()
+                        {
+                            new FieldRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT_DOCUMENTS_FIELD }
+                        }
+                    };
+
+                    QueryResult queryResult = await objectManager.QueryAsync(workspaceArtifactId, queryRequest, requestStart, batchSize);
+
+                    if ((batchSize + requestStart) < queryResult.TotalCount)
+                    {
+
+                        await UpdateDocumentCountFieldAsync(workspaceArtifactId, batchSize, requestStart + batchSize);
+                    }
+
+                    foreach (RelativityObject result in queryResult.Objects)
+                    {
+                        FieldValuePair documentFieldPair = result[GlobalVariable.PROCESSING_FIELD_OBJECT_DOCUMENTS_FIELD];
+                        List<RelativityObjectValue> documents = new List<RelativityObjectValue>();
+                        if (documentFieldPair.Value != null)
+                        {
+                            documents = (List<RelativityObjectValue>)documentFieldPair.Value;
+                        }
+
+                        RelativityObjectRef relativityObjectRef = new RelativityObjectRef { ArtifactID = result.ArtifactID };
+
+                        var updateRequest = new UpdateRequest()
+                        {
+                            Object = relativityObjectRef,
+                            FieldValues = new List<FieldRefValuePair>() 
+                            { 
+                                new FieldRefValuePair
+                                {
+                                    Field = new FieldRef
+                                    {
+                                        Guid = GlobalVariable.PROCESSING_FIELD_OBJECT_DOCUMENT_COUNT_FIELD
+                                    },
+                                    Value = documents.Count
+                                } 
+                            } 
+                        };
+
+                        await objectManager.UpdateAsync(workspaceArtifactId, updateRequest);
+
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Error occurred while updating the Document Count Field in workspce: {workspaceArtifactId}", workspaceArtifactId);
+            }
+        }
     }
 }

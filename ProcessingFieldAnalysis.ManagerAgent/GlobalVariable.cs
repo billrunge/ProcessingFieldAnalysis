@@ -24,6 +24,8 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         public static readonly Guid PROCESSING_FIELD_OBJECT_DATA_TYPE_FIELD = new Guid("868238A4-45C8-4305-A5F0-6DAF263A5A17");
         public static readonly Guid PROCESSING_FIELD_OBJECT_SOURCE_NAME_FIELD = new Guid("2581697D-D3E3-4DC5-8E3C-E9C5F05D1531");
         public static readonly Guid PROCESSING_FIELD_OBJECT_MAPPED_FIELDS_FIELD = new Guid("1BDD02EF-E645-49D2-8D99-DB23676A9AE3");
+        public static readonly Guid PROCESSING_FIELD_OBJECT_DOCUMENT_COUNT_FIELD = new Guid("31C528D8-02F4-421B-BA60-E5A269CC01E8");
+        public static readonly Guid PROCESSING_FIELD_OBJECT_DOCUMENTS_FIELD = new Guid("2653DE36-96FC-42B8-85AF-6D162B7C146E");
 
         //Document Object Fields
         public static readonly Guid DOCUMENT_OBJECT_OTHER_METADATA_FIELD = new Guid("DCE19DA4-D470-4EFC-A932-AFF489911A37");
@@ -35,5 +37,6 @@ namespace ProcessingFieldAnalysis.ManagerAgent
         public static readonly int PROCESSING_FIELD_MAINTENANCE_HOURLY_INTERVAL = 24;
         public static readonly int OTHER_METADATA_ANALYSIS_HOURLY_INTERVAL = 168;
         public static readonly int PROCESSING_FIELD_OBJECT_MASS_CREATE_BATCH_SIZE = 1000;
+        public static readonly int PROCESSING_FIELD_OBJECT_DOCUMENT_COUNT_UPDATE_BATCH_SIZE = 1000;
     }
 }

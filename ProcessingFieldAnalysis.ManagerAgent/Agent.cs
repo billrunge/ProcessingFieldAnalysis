@@ -39,6 +39,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                         List<MappableField> existingProcessingFields = await processingField.GetProcessingFieldObjectMappableFieldsAsync(workspaceArtifactId);
                         await processingField.PopulateProcessingFieldObjectAsync(workspaceArtifactId, mappableSourceFields, existingProcessingFields);
                         await processingField.UpdateProcessingFieldObjectsAsync(workspaceArtifactId, mappableSourceFields, existingProcessingFields);
+                        await processingField.UpdateDocumentCountFieldAsync(workspaceArtifactId, GlobalVariable.PROCESSING_FIELD_OBJECT_DOCUMENT_COUNT_UPDATE_BATCH_SIZE);
                         eddsQueue.EndProcessingFieldObjectMaintenance(workspaceArtifactId);
                     }
                 }
@@ -69,6 +70,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                             workspaceQueue.CheckInBatchOfDocumentArtifactIds(workspaceArtifactId, documentArtifactIds);
                             isWorkComplete = workspaceQueue.IsWorkComplete(workspaceArtifactId);
                         }
+                        await processingField.UpdateDocumentCountFieldAsync(workspaceArtifactId, GlobalVariable.PROCESSING_FIELD_OBJECT_DOCUMENT_COUNT_UPDATE_BATCH_SIZE);
                         eddsQueue.EndOtherMetadataAnalysis(workspaceArtifactId);
                     }
                     else
