@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisKepl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisListPageInteractionEventHandler", "ProcessingFieldAnalysisListPageInteractionEventHandler\ProcessingFieldAnalysisListPageInteractionEventHandler.csproj", "{3317BD60-DDF4-442E-85EC-63773F126DAF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessingFieldAnalysisPageInteractionEventHandler", "ProcessingFieldAnalysisPageInteractionEventHandler\ProcessingFieldAnalysisPageInteractionEventHandler.csproj", "{75B656E0-EAA4-490F-8BD4-38B11D67E934}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{3317BD60-DDF4-442E-85EC-63773F126DAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3317BD60-DDF4-442E-85EC-63773F126DAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3317BD60-DDF4-442E-85EC-63773F126DAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75B656E0-EAA4-490F-8BD4-38B11D67E934}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75B656E0-EAA4-490F-8BD4-38B11D67E934}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75B656E0-EAA4-490F-8BD4-38B11D67E934}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75B656E0-EAA4-490F-8BD4-38B11D67E934}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
