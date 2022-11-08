@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Relativity.API, Version=10.3.191.8, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Relativity.Api.10.3.191.8\lib\net462\Relativity.API.dll</HintPath>
     </Reference>
@@ -43,6 +46,10 @@
     <Reference Include="Relativity.Logging.Interfaces, Version=2019.5.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Relativity.Logging.2019.5.1\lib\net462\Relativity.Logging.Interfaces.dll</HintPath>
     </Reference>
+    <Reference Include="Relativity.Processing.Services.Interfaces, Version=12.3.57.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files\kCura Corporation\Relativity SDK\Relativity.Processing.Services.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -53,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ProcessingFieldAnalysis\ProcessingFieldAnalysisModule.cs" />
+    <Compile Include="ProcessingFieldAnalysis\v1\Publish.cs" />
     <Compile Include="ProcessingFieldAnalysis\v1\Queue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
