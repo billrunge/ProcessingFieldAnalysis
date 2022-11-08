@@ -15,7 +15,7 @@
 	eventHandlers[eventNames.ITEM_LIST_MODIFY_ACTIONS] = function (itemListActionsApi, view) {
 		console.log(view.ObjectTypeID);
 		itemListActionsApi.initialize();
-		itemListActionsApi.addAction("RePublish", customClickHandler, { title: "Re-Publish" });
+		itemListActionsApi.addAction("Republish", customClickHandler, { title: "Republish" });
 	};
 	return eventHandlers;
 }(eventNames, convenienceApi));
