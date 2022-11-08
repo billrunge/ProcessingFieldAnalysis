@@ -10,9 +10,11 @@ using ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1;
 using ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1.Exceptions;
 using ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1.Models;
 using System.Data;
+using Newtonsoft.Json;
+using Relativity.Services.Objects;
+using Relativity.Services.Objects.DataContracts;
 using Relativity.Processing.V1.Services;
 using Relativity.Processing.V1.Services.Interfaces.DTOs;
-using Newtonsoft.Json;
 
 namespace ProcessingFieldAnalysisKepler.Services.ProcessingFieldAnalysis.v1
 {
@@ -29,23 +31,61 @@ namespace ProcessingFieldAnalysisKepler.Services.ProcessingFieldAnalysis.v1
             _helper = helper;
         }
 
-        public async Task<PublishModel> PublishFiles(int workspaceId)
+        public async Task<PublishModel> PublishFiles(List<long> documentArtifactIds, int workspaceId)
         {
             PublishModel model;
 
+            Guid processingFileIdFieldGuid = new Guid("93E1CFEB-F21E-4386-ADC3-846066525FE8");
+            List<long> processingFileIds = new List<long>();
+
             try
             {
+                var queryRequest = new Relativity.ObjectManager.V1.Models.QueryRequest()
+                {
+                    ObjectType = new Relativity.ObjectManager.V1.Models.ObjectTypeRef { ArtifactTypeID = 10 },
+                    Condition = $"('Artifact ID' IN [{ string.Join(",", documentArtifactIds) }])",
+                    Fields = new List<Relativity.ObjectManager.V1.Models.FieldRef>()
+                    {
+                    new Relativity.ObjectManager.V1.Models.FieldRef { Guid = processingFileIdFieldGuid }
+                    }
+                };
+
+                using (Relativity.ObjectManager.V1.Interfaces.IObjectManager objectManager = _helper.GetServicesManager().CreateProxy<Relativity.ObjectManager.V1.Interfaces.IObjectManager>(ExecutionIdentity.System))
+                {
+                    Relativity.ObjectManager.V1.Models.QueryResult queryResult = await objectManager.QueryAsync(workspaceId, queryRequest, 1, 1000);
+
+                    foreach (Relativity.ObjectManager.V1.Models.RelativityObject result in queryResult.Objects)
+                    {
+                        Relativity.ObjectManager.V1.Models.FieldValuePair documentFieldPair = result[processingFileIdFieldGuid];
+
+                        bool parseSuccessful = long.TryParse(documentFieldPair.Value.ToString(), out long fileId);
+
+                        if (parseSuccessful)
+                        {
+                            processingFileIds.Add(fileId);
+                            _logger.LogError("Parsing fileId: {fileId}", fileId);
+                        }
+                        else
+                        {
+                            _logger.LogError("There was an issue parsing the file ids.");
+                        }
+                    }
+                }
+
+
+
                 using (IProcessingDocumentManager proxy = _helper.GetServicesManager().CreateProxy<IProcessingDocumentManager>(ExecutionIdentity.CurrentUser))
                 {
-                    ProcessingDocumentsRequest request = new ProcessingDocumentsRequest() {
+                    ProcessingDocumentsRequest request = new ProcessingDocumentsRequest()
+                    {
                         Expression = "{\"Type\":\"ConditionalExpression\",\"Property\":\"IsDeleted\",\"Constraint\":\"Is\",\"Value\":false}",
-                        ProcessingFileIDs = new List<long> {2, 3, 4, 5}
+                        ProcessingFileIDs = processingFileIds
                     };
 
                     await proxy.PublishDocumentsAsync(workspaceId, request);
-                
+
                 }
-                    model = new PublishModel
+                model = new PublishModel
                 {
                     Message = $"Processing Field Object Maintenance enabled for Workspace: {workspaceId}"
                 };

@@ -14,20 +14,23 @@ namespace ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1
     [RoutePrefix("Publish")]
     public interface IPublish : IDisposable
     {
-        /// <summary>
-        /// Get workspace name.
-        /// </summary>
-        /// <param name="workspaceID">Workspace ArtifactID.</param>
-        /// <returns><see cref="QueueModel"/> with the name of the workspace.</returns>
-        /// <remarks>
-        /// Example REST request:
-        ///   [GET] /Relativity.REST/api/ProcessingFieldAnalysis/v1/Queue/EnableProcessingFieldObjectMaintenance/1015024
-        /// Example REST response:
-        ///   {"Name":"Relativity Starter Template"}
-        /// </remarks>
-        [HttpPost]
+		/// <summary>
+		/// Publish files
+		/// </summary>
+		/// <param name="documentArtifactIds">a list of Document Artifact ids</param>
+		/// <param name="workspaceId">Workspace Artifact ID</param>
+		/// <returns>Collection of <see cref="$ext_ServiceName$Model"/> containing workspace names that match the query string.</returns>
+		/// <remarks>
+		/// Example REST request:
+		///   [POST] /Relativity.REST/api/$ext_ServiceModule$/v1/$ext_ServiceName$/workspace?limit=2
+		///   { "queryString":"a" }
+		/// Example REST response:
+		///   [{"Name":"New Case Template"},{"Name":"Relativity Starter Template"}]
+		/// </remarks>
+		[HttpPost]
         [Route("{workspaceId:int}")]
-        Task<PublishModel> PublishFiles(int workspaceId);
+        Task<PublishModel> PublishFiles(List<long> documentArtifactIds, int workspaceId);
 
     }
 }
+ 
