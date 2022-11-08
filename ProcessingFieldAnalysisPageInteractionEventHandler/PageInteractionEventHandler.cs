@@ -7,7 +7,7 @@ using System.Net;
 namespace ProcessingFieldAnalysisPageInteractionEventHandler
 {
     [kCura.EventHandler.CustomAttributes.Description("Page Interaction EventHandler")]
-    [System.Runtime.InteropServices.Guid("75b656e0-eaa4-490f-8bd4-38b11d67e934")]
+    [System.Runtime.InteropServices.Guid("ef31f3ef-67df-4746-a228-0bfcaeeab8e8")]
     public class PageInteractionEventHandler : kCura.EventHandler.PageInteractionEventHandler
     {
         public override Response PopulateScriptBlocks()
