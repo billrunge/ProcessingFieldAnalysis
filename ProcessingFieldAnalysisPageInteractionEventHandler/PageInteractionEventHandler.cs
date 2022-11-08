@@ -33,6 +33,6 @@ namespace ProcessingFieldAnalysisPageInteractionEventHandler
 
             return retVal;
         }
-        public override string[] ScriptFileNames => new string[] { "test.js" };
+        public override string[] ScriptFileNames => new string[] { "massAction.js" };
     }
 }
