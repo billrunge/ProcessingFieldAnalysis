@@ -126,5 +126,9 @@ namespace ProcessingFieldAnalysisKepler.Interfaces.ProcessingFieldAnalysis.v1
         [HttpGet]
         [Route("IsOtherMetadataAnalysisEnabled/{workspaceId:int}")]
         Task<QueueModel> IsOtherMetadataAnalysisEnabled(int workspaceId);
+
+        [HttpGet]
+        [Route("ForceCustomOtherMetadataAnalysis/{workspaceId:int}")]
+        Task<QueueModel> ForceCustomOtherMetadataAnalysis(int workspaceId);
     }
 }

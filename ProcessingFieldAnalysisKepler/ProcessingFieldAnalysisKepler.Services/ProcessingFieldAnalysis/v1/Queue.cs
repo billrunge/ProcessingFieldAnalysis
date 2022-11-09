@@ -327,6 +327,49 @@ namespace ProcessingFieldAnalysisKepler.Services.ProcessingFieldAnalysis.v1
             return model;
         }
 
+        public async Task<QueueModel> ForceCustomOtherMetadataAnalysis(int workspaceId)
+        {
+            QueueModel model;
+
+            try
+            {
+                string workspaceName = await _helper.GetDBContext(-1).ExecuteScalarAsync<string>(new ContextQuery()
+                {
+                    SqlStatement = @"
+                            UPDATE [ProcessingFieldManagerQueue]
+                            SET    [OtherMetadataAnalysisLastRun]    = NULL,
+                                   [OtherMetadataAnalysisInProgress] = 1
+                            WHERE  [WorkspaceArtifactID] = @WorkspaceArtifactID",
+                    Parameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter()
+                        {
+                            ParameterName = "@WorkspaceArtifactID",
+                            SqlDbType = SqlDbType.Int, Value = workspaceId
+                        }
+                    }
+                }).ConfigureAwait(false);
+
+                model = new QueueModel
+                {
+                    Message = $"Custom Other Metadata Analysis forced for Workspace: {workspaceId}"
+                };
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Could not force custom Other Metadata Analysis for Workspace: {WorkspaceId}.", workspaceId);
+                throw new QueueException($"Could not force custom Other Metadata Analysis for Workspace: {workspaceId}.")
+                {
+                    FaultSafeObject = new QueueException.FaultSafeInfo()
+                    {
+                        Information = $"Workspace {workspaceId}",
+                        Time = DateTime.Now
+                    }
+                };
+            }
+            return model;
+        }
+
         public async Task<QueueModel> IsOtherMetadataAnalysisEnabled(int workspaceId)
         {
             QueueModel model;

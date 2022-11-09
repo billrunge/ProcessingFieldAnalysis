@@ -88,6 +88,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                                 workspaceQueue.CheckInBatchOfDocumentArtifactIds(workspaceArtifactId, documentArtifactIds);
                                 isWorkComplete = workspaceQueue.IsWorkComplete(workspaceArtifactId);
                             }
+                            eddsQueue.EndOtherMetadataAnalysis(workspaceArtifactId);
                         }
                     }
                 }

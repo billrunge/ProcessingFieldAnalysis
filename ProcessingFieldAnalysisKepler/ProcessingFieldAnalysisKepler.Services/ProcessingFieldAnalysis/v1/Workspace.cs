@@ -48,9 +48,9 @@ namespace ProcessingFieldAnalysisKepler.Services.ProcessingFieldAnalysis.v1
                               SELECT 1
                           END";
 
-                ContextQuery query = new ContextQuery() 
-                { 
-                    SqlStatement = sql                
+                ContextQuery query = new ContextQuery()
+                {
+                    SqlStatement = sql
                 };
 
                 int result = await workspaceDbContext.ExecuteScalarAsync<int>(query);
@@ -89,9 +89,9 @@ namespace ProcessingFieldAnalysisKepler.Services.ProcessingFieldAnalysis.v1
                                 ON ProcessingFieldOtherMetadataQueue(DocumentArtifactID)
                                 WITH IGNORE_DUP_KEY
                           END";
-                ContextQuery query = new ContextQuery() 
-                { 
-                SqlStatement = sql
+                ContextQuery query = new ContextQuery()
+                {
+                    SqlStatement = sql
                 };
 
                 await workspaceDbContext.ExecuteNonQueryAsync(query);
@@ -106,34 +106,36 @@ namespace ProcessingFieldAnalysisKepler.Services.ProcessingFieldAnalysis.v1
         {
             try
             {
-                    DataTable inputTable = new DataTable();
+                DataTable inputTable = new DataTable();
 
-                    inputTable.Columns.Add("DocumentArtifactID", typeof(int));
-                    inputTable.Columns.Add("Status", typeof(int));
-                    inputTable.Columns.Add("Started", typeof(DateTime));
+                inputTable.Columns.Add("DocumentArtifactID", typeof(int));
+                inputTable.Columns.Add("Status", typeof(int));
+                inputTable.Columns.Add("Started", typeof(DateTime));
 
-                    foreach (int documentArtifactId in documentArtifactIds)
-                    {
-                        DataRow row = inputTable.NewRow();
-                        row["DocumentArtifactID"] = documentArtifactId;
-                        row["Status"] = 0;
-                        row["Started"] = DBNull.Value;
-                        inputTable.Rows.Add(row);
-                    }
+                foreach (int documentArtifactId in documentArtifactIds)
+                {
+                    DataRow row = inputTable.NewRow();
+                    row["DocumentArtifactID"] = documentArtifactId;
+                    row["Status"] = 0;
+                    row["Started"] = DBNull.Value;
+                    inputTable.Rows.Add(row);
+                }
 
-                    ISqlBulkCopyParameters bulkParams = new SqlBulkCopyParameters()
-                    {
-                        BatchSize = 1000,
-                        DestinationTableName = "ProcessingFieldOtherMetadataQueue"
-                    };
+                ISqlBulkCopyParameters bulkParams = new SqlBulkCopyParameters()
+                {
+                    BatchSize = 1000,
+                    DestinationTableName = "ProcessingFieldOtherMetadataQueue"
+                };
 
-                    IDBContext workspaceDbContext = _helper.GetDBContext(workspaceArtifactId);
+                IDBContext workspaceDbContext = _helper.GetDBContext(workspaceArtifactId);
 
-                    DataTableReader dataTableReader = new DataTableReader(inputTable);
+                DataTableReader dataTableReader = new DataTableReader(inputTable);
 
-                    CancellationToken token = new CancellationToken();
+                string resourceTableName = $"[Resource].[PFA_{Guid.NewGuid().ToString("N")}]";
 
-                    await workspaceDbContext.ExecuteBulkCopyAsync(dataTableReader, bulkParams, token);
+                CancellationToken token = new CancellationToken();
+
+                await workspaceDbContext.ExecuteBulkCopyAsync(dataTableReader, bulkParams, token);
             }
             catch (Exception e)
             {
@@ -198,7 +200,7 @@ namespace ProcessingFieldAnalysisKepler.Services.ProcessingFieldAnalysis.v1
             }
             catch (Exception e)
             {
-               _logger.LogError(e, "Failed to get Artifact ID for Guid: {guid} in Workspace: {workspaceArtifactId}", guid, workspaceArtifactId);
+                _logger.LogError(e, "Failed to get Artifact ID for Guid: {guid} in Workspace: {workspaceArtifactId}", guid, workspaceArtifactId);
             }
             return string.Empty;
         }
