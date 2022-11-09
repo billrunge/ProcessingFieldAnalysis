@@ -54,9 +54,11 @@
   <ItemGroup>
     <Compile Include="ProcessingFieldAnalysis\IProcessingFieldAnalysisModule.cs" />
     <Compile Include="ProcessingFieldAnalysis\v1\Exceptions\PublishException.cs" />
+    <Compile Include="ProcessingFieldAnalysis\v1\IWorkspace.cs" />
     <Compile Include="ProcessingFieldAnalysis\v1\IPublish.cs" />
     <Compile Include="ProcessingFieldAnalysis\v1\IQueue.cs" />
     <Compile Include="ProcessingFieldAnalysis\v1\Exceptions\QueueException.cs" />
+    <Compile Include="ProcessingFieldAnalysis\v1\Models\WorkspaceModel.cs" />
     <Compile Include="ProcessingFieldAnalysis\v1\Models\PublishModel.cs" />
     <Compile Include="ProcessingFieldAnalysis\v1\Models\QueueModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

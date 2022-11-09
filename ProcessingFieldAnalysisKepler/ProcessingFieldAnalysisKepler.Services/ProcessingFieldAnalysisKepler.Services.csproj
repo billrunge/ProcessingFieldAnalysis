@@ -73,7 +73,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProcessingFieldAnalysis\v1\GlobalVariable.cs" />
     <Compile Include="ProcessingFieldAnalysis\ProcessingFieldAnalysisModule.cs" />
+    <Compile Include="ProcessingFieldAnalysis\v1\Workspace.cs" />
     <Compile Include="ProcessingFieldAnalysis\v1\Publish.cs" />
     <Compile Include="ProcessingFieldAnalysis\v1\Queue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
