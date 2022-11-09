@@ -107,9 +107,6 @@ namespace ProcessingFieldAnalysisKepler.Services.ProcessingFieldAnalysis.v1
         }
 
 
-
-
-
         /// <summary>
         /// All Kepler services must inherit from IDisposable.
         /// Use this dispose method to dispose of any unmanaged memory at this point.
