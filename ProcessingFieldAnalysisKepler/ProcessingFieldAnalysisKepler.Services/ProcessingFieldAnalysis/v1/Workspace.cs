@@ -121,21 +121,99 @@ namespace ProcessingFieldAnalysisKepler.Services.ProcessingFieldAnalysis.v1
                     inputTable.Rows.Add(row);
                 }
 
+                string resourceTableName = $"[Resource].[PFA_{Guid.NewGuid().ToString("N")}]";
+
                 ISqlBulkCopyParameters bulkParams = new SqlBulkCopyParameters()
                 {
                     BatchSize = 1000,
-                    DestinationTableName = "ProcessingFieldOtherMetadataQueue"
+                    DestinationTableName = resourceTableName
                 };
 
                 IDBContext workspaceDbContext = _helper.GetDBContext(workspaceArtifactId);
 
                 DataTableReader dataTableReader = new DataTableReader(inputTable);
 
-                string resourceTableName = $"[Resource].[PFA_{Guid.NewGuid().ToString("N")}]";
+                string sql = $@"
+                        IF Object_id(N'{ resourceTableName }', N'U') IS NULL
+                          BEGIN
+                              SET ANSI_NULLS ON
+                              SET QUOTED_IDENTIFIER ON
+
+                              CREATE TABLE { resourceTableName }
+                                (
+                                   [DocumentArtifactID] [int] NOT NULL UNIQUE,
+                                   [Status]             [int] NOT NULL,
+                                   [Started]        [datetime] NULL
+                                )
+                              ON [PRIMARY]
+
+                              CREATE UNIQUE CLUSTERED INDEX PK_DocumentArtifactID
+                                ON { resourceTableName }(DocumentArtifactID)
+                                WITH IGNORE_DUP_KEY
+                          END";
+
+                ContextQuery query = new ContextQuery()
+                {
+                    SqlStatement = sql
+                };
+
+                await workspaceDbContext.ExecuteNonQueryAsync(query);
 
                 CancellationToken token = new CancellationToken();
 
                 await workspaceDbContext.ExecuteBulkCopyAsync(dataTableReader, bulkParams, token);
+
+                sql = $@"
+                        MERGE [ProcessingFieldOtherMetadataQueue] AS Target
+                        USING { resourceTableName } AS Source
+                        ON Source.[DocumentArtifactID] = Target.[DocumentArtifactID]
+                        WHEN NOT MATCHED BY Target THEN
+                          INSERT ([DocumentArtifactID],
+                                  [Status],
+                                  [Started])
+                          VALUES (Source.[DocumentArtifactID],
+                                  Source.[Status],
+                                  Source[Started])
+                        WHEN MATCHED THEN
+                          UPDATE SET Target.[Status] = Source.[Status],
+                                     Target.[Started] = Source.[Started]";
+
+
+                query = new ContextQuery()
+                {
+                    SqlStatement = sql
+                };
+
+                await workspaceDbContext.ExecuteNonQueryAsync(query);
+
+                string sql = $@"
+                        IF Object_id(N'{ resourceTableName }', N'U') IS NULL
+                          BEGIN
+                              SET ANSI_NULLS ON
+                              SET QUOTED_IDENTIFIER ON
+
+                              CREATE TABLE { resourceTableName }
+                                (
+                                   [DocumentArtifactID] [int] NOT NULL UNIQUE,
+                                   [Status]             [int] NOT NULL,
+                                   [Started]        [datetime] NULL
+                                )
+                              ON [PRIMARY]
+
+                              CREATE UNIQUE CLUSTERED INDEX PK_DocumentArtifactID
+                                ON { resourceTableName }(DocumentArtifactID)
+                                WITH IGNORE_DUP_KEY
+                          END";
+
+                ContextQuery query = new ContextQuery()
+                {
+                    SqlStatement = sql
+                };
+
+                await workspaceDbContext.ExecuteNonQueryAsync(query);
+
+
+
             }
             catch (Exception e)
             {
