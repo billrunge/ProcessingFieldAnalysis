@@ -429,7 +429,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                     var queryRequest = new QueryRequest()
                     {
                         ObjectType = new ObjectTypeRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT },
-                        Condition = $"((('{documentsFieldName}' SUBQUERY ((('{documentsFieldName}' ISSET))))))",
+                        //Condition = $"((('{documentsFieldName}' SUBQUERY ((('{documentsFieldName}' ISSET))))))",
                         Fields = new List<FieldRef>()
                         {
                             new FieldRef { Guid = GlobalVariable.PROCESSING_FIELD_OBJECT_DOCUMENTS_FIELD }
@@ -468,7 +468,7 @@ namespace ProcessingFieldAnalysis.ManagerAgent
                                     },
                                     Value = documents.Count
                                 } 
-                            } 
+                            }
                         };
 
                         await objectManager.UpdateAsync(workspaceArtifactId, updateRequest);
